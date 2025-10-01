@@ -15,10 +15,8 @@
     <style>
         @keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}}
         @keyframes bounce{0%,100%{transform:translateY(-25%)}50%{transform:translateY(0)}}
-        @keyframes slideDown{from{transform:translateY(-100%);opacity:0}to{transform:translateY(0);opacity:1}}
         .animate-pulse{animation:pulse 2s cubic-bezier(.4,0,.6,1) infinite}
         .animate-bounce{animation:bounce 1s infinite}
-        .animate-slideDown{animation:slideDown .5s ease-out}
     </style>
 </head>
 <body>
@@ -40,14 +38,13 @@
             'Lời Nguyện Mân Côi':'Lạy Chúa Giêsu, xin tha tội cho chúng con, xin cứu chúng con khỏi sa hỏa ngục, xin đem các linh hồn lên thiên đàng, nhất là những linh hồn cần đến lòng Chúa thương xót hơn. Amen.'
         };
         function App(){
-            const [s,setS]=useState(0),[bc,setBc]=useState(0),[dec,setDec]=useState(0),[mys,setMys]=useState('Mầu Nhiệm Vui'),[sound,setSound]=useState(true),[vib,setVib]=useState(true),[showP,setShowP]=useState(false),[showM,setShowM]=useState(false),[hist,setHist]=useState([]),[dark,setDark]=useState(true),[share,setShare]=useState(false),[notif,setNotif]=useState(false),[total,setTotal]=useState(0),[streak,setStreak]=useState(0),[showD,setShowD]=useState(true);
-            const PAYPAL="https://paypal.me/yourusername";
+            const [s,setS]=useState(0),[bc,setBc]=useState(0),[dec,setDec]=useState(0),[mys,setMys]=useState('Mầu Nhiệm Vui'),[sound,setSound]=useState(true),[vib,setVib]=useState(true),[showP,setShowP]=useState(false),[showM,setShowM]=useState(false),[hist,setHist]=useState([]),[dark,setDark]=useState(true),[share,setShare]=useState(false),[notif,setNotif]=useState(false),[total,setTotal]=useState(0),[streak,setStreak]=useState(0);
+           
             useEffect(()=>{
                 const saved=localStorage.getItem('rosaryData');
                 if(saved){const d=JSON.parse(saved);setHist(d.history||[]);setTotal(d.totalPrayers||0);setStreak(d.streak||0);}
-                if(localStorage.getItem('donationDismissed'))setShowD(false);
             },[]);
-            const dismissD=()=>{setShowD(false);localStorage.setItem('donationDismissed','true');};
+            
             const steps=[
                 {i:'Làm Dấu Thánh Giá và đọc Kinh Tin Kính',p:'Kinh Tin Kính',c:1,e:'✝️'},
                 {i:'Đọc Kinh Lạy Cha',p:'Kinh Lạy Cha',c:1,e:'🙏'},
@@ -100,27 +97,9 @@
             const bg=dark?'bg-gradient-to-br from-blue-900 via-purple-900 to-indigo-900':'bg-gradient-to-br from-blue-100 via-purple-100 to-pink-100';
             const card=dark?'bg-white/10 border-white/20':'bg-white/80 border-gray-200';
             const txt=dark?'text-white':'text-gray-900',txt2=dark?'text-blue-200':'text-gray-600';
+
 return React.createElement('div',{className:`min-h-screen ${bg} flex items-center justify-center p-4 transition-colors duration-500`},
-                showD&&React.createElement('div',{className:'fixed top-0 left-0 right-0 z-50 animate-slideDown'},
-                    React.createElement('div',{className:`${dark?'bg-gradient-to-r from-amber-500 to-orange-500':'bg-gradient-to-r from-amber-400 to-orange-400'} shadow-lg`},
-                        React.createElement('div',{className:'max-w-4xl mx-auto px-4 py-3'},
-                            React.createElement('div',{className:'flex items-center justify-between gap-4'},
-                                React.createElement('div',{className:'flex items-center gap-3 flex-1'},
-                                    React.createElement('span',{className:'text-2xl'},'❤️'),
-                                    React.createElement('div',{className:'flex-1'},
-                                        React.createElement('p',{className:'text-white font-semibold text-sm'},'Hỗ trợ ứng dụng này'),
-                                        React.createElement('p',{className:'text-white/90 text-xs'},'App Store phí $99/năm. Donation giúp duy trì app miễn phí 🙏')
-                                    )
-                                ),
-                                React.createElement('div',{className:'flex items-center gap-2'},
-                                    React.createElement('a',{href:PAYPAL,target:'_blank',rel:'noopener noreferrer',className:'bg-white text-orange-600 font-bold px-4 py-2 rounded-lg text-sm hover:bg-orange-50 transition-colors whitespace-nowrap'},'💝 Ủng hộ'),
-                                    React.createElement('button',{onClick:dismissD,className:'text-white/80 hover:text-white p-2'},React.createElement('span',{className:'text-xl'},'×'))
-                                )
-                            )
-                        )
-                    )
-                ),
-                React.createElement('div',{className:'w-full max-w-md',style:{marginTop:showD?'80px':'0'}},
+                React.createElement('div',{className:'w-full max-w-md'},
                     React.createElement('div',{className:`${card} backdrop-blur-lg rounded-3xl shadow-2xl p-8 border transition-colors duration-500`},
                         React.createElement('div',{className:'flex justify-between items-start mb-6'},
                             React.createElement('div',{className:'flex gap-2'},
@@ -196,7 +175,7 @@ return React.createElement('div',{className:`min-h-screen ${bg} flex items-cente
                         )
                     )
                 ),
-showP&&React.createElement('div',{className:'fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50',onClick:()=>setShowP(false)},
+                showP&&React.createElement('div',{className:'fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50',onClick:()=>setShowP(false)},
                     React.createElement('div',{className:`${dark?'bg-gradient-to-br from-blue-900 to-purple-900':'bg-white'} rounded-3xl p-6 max-w-lg w-full max-h-[80vh] overflow-y-auto border ${dark?'border-white/20':'border-gray-200'}`,onClick:e=>e.stopPropagation()},
                         React.createElement('div',{className:'flex justify-between items-center mb-4'},
                             React.createElement('h2',{className:`text-2xl font-bold ${txt}`},'Các Kinh Nguyện'),
