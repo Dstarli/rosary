@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ứng Dụng Lần Hạt Mân Côi</title>
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#1e3a8a">
+    <link rel="apple-touch-icon" href="icon-192.png">
+    <meta name="description" content="Ứng dụng hỗ trợ cầu nguyện Mân Côi theo truyền thống Công Giáo">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <style>
+        @keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}}
+        @keyframes bounce{0%,100%{transform:translateY(-25%)}50%{transform:translateY(0)}}
+        @keyframes slideDown{from{transform:translateY(-100%);opacity:0}to{transform:translateY(0);opacity:1}}
+        .animate-pulse{animation:pulse 2s cubic-bezier(.4,0,.6,1) infinite}
+        .animate-bounce{animation:bounce 1s infinite}
+        .animate-slideDown{animation:slideDown .5s ease-out}
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+    <script type="text/babel">
+        const {useState,useEffect}=React;
+        const M={
+            'Mầu Nhiệm Vui':{days:'Thứ 2, Thứ 7',color:'from-yellow-400 to-orange-500',items:['Thiên thần truyền tin cho Đức Bà chịu thai','Đức Bà đi viếng Bà Thánh Isave','Đức Bà sinh Đức Chúa Giêsu trong hang đá','Đức Bà dâng Đức Chúa Giêsu trong đền Thánh','Đức Bà tìm được Đức Chúa Giêsu trong Đền thánh']},
+            'Mầu Nhiệm Thương':{days:'Thứ 3, Thứ 6',color:'from-red-400 to-rose-500',items:['Đức Chúa Giêsu lo buồn đổ mồ hôi máu','Đức Chúa Giêsu chịu đánh đòn','Đức Chúa Giêsu chịu đội mão gai','Đức Chúa Giêsu vác Thánh Giá','Đức Chúa Giêsu chịu chết trên cây Thánh Giá']},
+            'Mầu Nhiệm Mừng':{days:'Thứ 4, Chủ Nhật',color:'from-amber-400 to-yellow-500',items:['Đức Chúa Giêsu sống lại','Đức Chúa Giêsu lên trời','Đức Chúa Thánh Thần hiện xuống','Đức Chúa Trời cho Đức Bà lên trời','Đức Chúa Trời thưởng Đức Mẹ trên trời']},
+            'Mầu Nhiệm Sáng':{days:'Thứ 5',color:'from-blue-400 to-cyan-500',items:['Đức Chúa Giêsu chịu phép Rửa tại sông Giođan','Đức Chúa Giêsu dự tiệc cưới Cana','Đức Chúa Giêsu rao giảng Nước Trời','Đức Chúa Giêsu biến hình trên núi','Đức Chúa Giêsu lập bí tích Thánh Thể']}
+        };
+        const P={
+            'Kinh Tin Kính':'Tôi tin kính Đức Chúa Trời là Cha phép tắc vô cùng dựng nên trời đất. Tôi tin kính Đức Chúa GiêSu Kitô là con một Đức Chúa Cha cùng là Chúa chúng tôi; bởi phép Đức Chúa Thánh Thần mà người xuống thai, sinh bởi Bà Maria đồng trinh: chịu nạn đời quan Phong-xi-ô Phi-la-tô, chịu đóng đanh trên cây Thánh Giá, chết và táng xác, xuống ngục tổ tông, ngày thứ ba bởi trong kẻ chết sống lại; lên trời ngự bên hữu Đức Chúa Cha phép tắc vô cùng; ngày sau bởi trời lại xuống phán xét kẻ sống và kẻ chết. Tôi tin kính Đức Chúa Thánh Thần. Tôi tin có hội Thánh hằng có ở khắp thế này, các Thánh thông công. Tôi tin phép tha tội tôi tin xác loài người ngày sau sống lại. Tôi tin hằng sống vậy, Amen.',
+            'Kinh Lạy Cha':'Lạy Cha chúng con ở trên trời, chúng con nguyện danh Cha cả sáng, nước Cha trị đến, ý Cha thể hiện dưới đất cũng như trên trời. Xin Cha cho chúng con hôm nay lương thực hằng ngày và tha nợ chúng con như chúng con cũng tha kẻ có nợ chúng con. Xin chớ để chúng con sa chước cám dỗ, nhưng cứu chúng con cho khỏi mọi sự dữ. Amen.',
+            'Kinh Kính Mừng':'Kính mừng Maria đầy ơn phúc, Đức Chúa Trời ở cùng Bà, Bà có phúc lạ hơn mọi người nữ, và Giêsu con lòng Bà gồm phúc lạ. Thánh Maria Đức Mẹ Chúa Trời, cầu cho chúng con là kẻ có tội khi này và trong giờ lâm tử. Amen.',
+            'Kinh Sáng Danh':'Sáng danh Đức Chúa Cha, và Đức Chúa Con, và Đức Chúa Thánh Thần. Như đã có trước vô cùng, và bây giờ, và hằng có, và đời đời chẳng cùng. Amen.',
+            'Kinh Lạy Nữ Vương':'Lạy Nữ Vương, Mẹ nhân lành, làm cho chúng con được sống, được vui, được cậy, thân lạy Mẹ. Chúng con là con cái Evà ở chốn khách đày này, kêu đến cùng Bà. Than van kêu khóc trong nơi khóc lóc khổ nầy. Ôi! Lạy Chúa bầu chúng con, xin ghé mặt thương xem chúng con. Đến sau khỏi đày, xin cho chúng con được thấy Đức Chúa Giêsu, Con lòng Bà gồm phúc lạ. Ôi khoan thay! Nhân thay! Dịu thay! Thánh Maria trọn đời đồng trinh. Amen.',
+            'Lời Nguyện Mân Côi':'Lạy Chúa Giêsu, xin tha tội cho chúng con, xin cứu chúng con khỏi sa hỏa ngục, xin đem các linh hồn lên thiên đàng, nhất là những linh hồn cần đến lòng Chúa thương xót hơn. Amen.'
+        };
+        function App(){
+            const [s,setS]=useState(0),[bc,setBc]=useState(0),[dec,setDec]=useState(0),[mys,setMys]=useState('Mầu Nhiệm Vui'),[sound,setSound]=useState(true),[vib,setVib]=useState(true),[showP,setShowP]=useState(false),[showM,setShowM]=useState(false),[hist,setHist]=useState([]),[dark,setDark]=useState(true),[share,setShare]=useState(false),[notif,setNotif]=useState(false),[total,setTotal]=useState(0),[streak,setStreak]=useState(0),[showD,setShowD]=useState(true);
+            const PAYPAL="https://paypal.me/yourusername";
+            useEffect(()=>{
+                const saved=localStorage.getItem('rosaryData');
+                if(saved){const d=JSON.parse(saved);setHist(d.history||[]);setTotal(d.totalPrayers||0);setStreak(d.streak||0);}
+                if(localStorage.getItem('donationDismissed'))setShowD(false);
+            },[]);
+            const dismissD=()=>{setShowD(false);localStorage.setItem('donationDismissed','true');};
+            const steps=[
+                {i:'Làm Dấu Thánh Giá và đọc Kinh Tin Kính',p:'Kinh Tin Kính',c:1,e:'✝️'},
+                {i:'Đọc Kinh Lạy Cha',p:'Kinh Lạy Cha',c:1,e:'🙏'},
+                {i:'Đọc 3 Kinh Kính Mừng',p:'Kinh Kính Mừng',c:3,e:'📿'},
+                {i:'Đọc Kinh Sáng Danh',p:'Kinh Sáng Danh',c:1,e:'✨'}
+            ];
+            const getStep=()=>{
+                if(s<4)return steps[s];
+                if(s>=24)return s===24?{i:'Đọc Kinh Lạy Nữ Vương',p:'Kinh Lạy Nữ Vương',c:1,e:'👑'}:{i:'Làm Dấu Thánh Giá - Hoàn Thành!',p:'',c:0,e:'✝️'};
+                const dIdx=Math.floor((s-4)/4),sInD=(s-4)%4;
+                const dSteps=[
+                    {i:`Mầu Nhiệm Thứ ${dIdx+1}: ${M[mys].items[dIdx]}`,p:'mystery',c:0,e:'🌟'},
+                    {i:'Đọc Kinh Lạy Cha',p:'Kinh Lạy Cha',c:1,e:'🙏'},
+                    {i:'Đọc 10 Kinh Kính Mừng',p:'Kinh Kính Mừng',c:10,e:'📿'},
+                    {i:'Đọc Kinh Sáng Danh và Lời Nguyện Mân Côi',p:'Kinh Sáng Danh',c:1,e:'✨'}
+                ];
+                return dSteps[sInD];
+            };
+            const playSound=()=>{
+                if(!sound)return;
+                const ctx=new(window.AudioContext||window.webkitAudioContext)(),osc=ctx.createOscillator(),gain=ctx.createGain();
+                osc.connect(gain);gain.connect(ctx.destination);osc.frequency.value=600;osc.type='sine';
+                gain.gain.setValueAtTime(.15,ctx.currentTime);gain.gain.exponentialRampToValueAtTime(.01,ctx.currentTime+.15);
+                osc.start(ctx.currentTime);osc.stop(ctx.currentTime+.15);
+            };
+            const next=()=>{
+                const cur=getStep();
+                if(cur.c===0||bc+1>=cur.c){
+                    if(s<25){
+                        setS(s+1);setBc(0);
+                        if(s>=4&&s<24&&(s-4)%4===3)setDec(Math.floor((s-4)/4)+1);
+                        if(s===24&&'vibrate'in navigator)navigator.vibrate([200,100,200,100,200]);
+                    }else{
+                        const sess={mystery:mys,date:new Date().toLocaleString('vi-VN'),completed:true};
+                        const newH=[sess,...hist.slice(0,9)],newT=total+1,newS=streak+1;
+                        setHist(newH);setTotal(newT);setStreak(newS);
+                        localStorage.setItem('rosaryData',JSON.stringify({history:newH,totalPrayers:newT,streak:newS}));
+                        setS(0);setBc(0);setDec(0);
+                    }
+                }else{setBc(bc+1);}
+                playSound();
+                if(vib&&'vibrate'in navigator)navigator.vibrate(30);
+            };
+            const shareText=()=>{
+                const txt=`🙏 Tôi vừa lần Mân Côi (${mys})!\n\n📊 Tổng: ${total} lần\n🔥 Chuỗi: ${streak} ngày\n\n#MânCôi`;
+                if(navigator.share)navigator.share({title:'Mân Côi',text:txt});
+                else{navigator.clipboard.writeText(txt);setShare(true);setTimeout(()=>setShare(false),2000);}
+            };
+            const cur=getStep(),cm=M[mys],prog=(s/25)*100;
+            const bg=dark?'bg-gradient-to-br from-blue-900 via-purple-900 to-indigo-900':'bg-gradient-to-br from-blue-100 via-purple-100 to-pink-100';
+            const card=dark?'bg-white/10 border-white/20':'bg-white/80 border-gray-200';
+            const txt=dark?'text-white':'text-gray-900',txt2=dark?'text-blue-200':'text-gray-600';
+return React.createElement('div',{className:`min-h-screen ${bg} flex items-center justify-center p-4 transition-colors duration-500`},
+                showD&&React.createElement('div',{className:'fixed top-0 left-0 right-0 z-50 animate-slideDown'},
+                    React.createElement('div',{className:`${dark?'bg-gradient-to-r from-amber-500 to-orange-500':'bg-gradient-to-r from-amber-400 to-orange-400'} shadow-lg`},
+                        React.createElement('div',{className:'max-w-4xl mx-auto px-4 py-3'},
+                            React.createElement('div',{className:'flex items-center justify-between gap-4'},
+                                React.createElement('div',{className:'flex items-center gap-3 flex-1'},
+                                    React.createElement('span',{className:'text-2xl'},'❤️'),
+                                    React.createElement('div',{className:'flex-1'},
+                                        React.createElement('p',{className:'text-white font-semibold text-sm'},'Hỗ trợ ứng dụng này'),
+                                        React.createElement('p',{className:'text-white/90 text-xs'},'App Store phí $99/năm. Donation giúp duy trì app miễn phí 🙏')
+                                    )
+                                ),
+                                React.createElement('div',{className:'flex items-center gap-2'},
+                                    React.createElement('a',{href:PAYPAL,target:'_blank',rel:'noopener noreferrer',className:'bg-white text-orange-600 font-bold px-4 py-2 rounded-lg text-sm hover:bg-orange-50 transition-colors whitespace-nowrap'},'💝 Ủng hộ'),
+                                    React.createElement('button',{onClick:dismissD,className:'text-white/80 hover:text-white p-2'},React.createElement('span',{className:'text-xl'},'×'))
+                                )
+                            )
+                        )
+                    )
+                ),
+                React.createElement('div',{className:'w-full max-w-md',style:{marginTop:showD?'80px':'0'}},
+                    React.createElement('div',{className:`${card} backdrop-blur-lg rounded-3xl shadow-2xl p-8 border transition-colors duration-500`},
+                        React.createElement('div',{className:'flex justify-between items-start mb-6'},
+                            React.createElement('div',{className:'flex gap-2'},
+                                React.createElement('button',{onClick:()=>setDark(!dark),className:`${dark?'bg-white/10':'bg-gray-200'} hover:opacity-80 ${txt} p-2 rounded-lg border ${dark?'border-white/20':'border-gray-300'}`},dark?'🌙':'☀️'),
+                                React.createElement('button',{onClick:()=>notif?setNotif(false):Notification.requestPermission().then(p=>setNotif(p==='granted')),className:`${dark?'bg-white/10':'bg-gray-200'} hover:opacity-80 ${txt} p-2 rounded-lg border ${dark?'border-white/20':'border-gray-300'}`},notif?'🔔':'🔕')
+                            ),
+                            React.createElement('div',{className:'text-right'},
+                                React.createElement('div',{className:`text-xs ${txt2}`},'Tổng cộng'),
+                                React.createElement('div',{className:`text-lg font-bold ${txt}`},total),
+                                React.createElement('div',{className:`text-xs ${txt2}`},`🔥 ${streak} ngày`)
+                            )
+                        ),
+                        React.createElement('div',{className:'text-center mb-6'},
+                            React.createElement('div',{className:`inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br ${cm.color} rounded-full mb-4 shadow-lg ${s>0?'animate-pulse':''}`},'❤️'),
+                            React.createElement('h1',{className:`text-3xl font-bold ${txt} mb-2`},'Mân Côi'),
+                            React.createElement('p',{className:txt2+' text-sm font-medium'},mys),
+                            React.createElement('p',{className:`${dark?'text-blue-300/60':'text-gray-500'} text-xs`},cm.days)
+                        ),
+                        React.createElement('div',{className:`${dark?'bg-white/5':'bg-gray-200'} rounded-full h-2 mb-6`},
+                            React.createElement('div',{className:`bg-gradient-to-r ${cm.color} h-2 rounded-full transition-all duration-300`,style:{width:`${prog}%`}})
+                        ),
+                        React.createElement('div',{className:`${dark?'bg-white/5':'bg-gray-50'} rounded-2xl p-6 mb-6 border ${dark?'border-white/10':'border-gray-200'}`},
+                            React.createElement('div',{className:'text-center mb-4'},
+                                React.createElement('div',{className:'text-6xl mb-2'},cur.e),
+                                React.createElement('div',{className:`${txt} text-lg font-semibold mb-2`},cur.i),
+                                cur.c>1&&React.createElement('div',{className:`${txt2} text-3xl font-bold mb-3`},`${bc+1} / ${cur.c}`),
+                                s===25&&React.createElement('div',{className:'text-yellow-400 font-bold text-xl animate-bounce mt-2'},'✨ Hoàn Thành Chuỗi Mân Côi! ✨')
+                            ),
+                            cur.p&&cur.p!=='mystery'&&React.createElement('div',{className:`${dark?'bg-white/5 border-white/10':'bg-white border-gray-200'} rounded-xl p-4 border`},
+                                React.createElement('p',{className:`${dark?'text-white/80':'text-gray-700'} text-sm leading-relaxed text-center`},P[cur.p]),
+                                cur.p==='Kinh Sáng Danh'&&s>=4&&s<24&&(s-4)%4===3&&React.createElement('div',{className:`${dark?'text-blue-300':'text-blue-600'} text-sm mt-3 pt-3 border-t ${dark?'border-white/10':'border-gray-200'}`},
+                                    React.createElement('p',{className:'font-semibold mb-1'},'Lời Nguyện Mân Côi:'),
+                                    React.createElement('p',{className:'leading-relaxed'},P['Lời Nguyện Mân Côi'])
+                                )
+                            ),
+                            s>=4&&s<24&&React.createElement('div',{className:'flex items-center justify-center gap-2 mt-4'},
+                                React.createElement('div',{className:'flex gap-1'},
+                                    [0,1,2,3,4].map(i=>React.createElement('div',{key:i,className:`w-3 h-3 rounded-full transition-all ${i<dec?`bg-gradient-to-br ${cm.color} shadow-lg`:dark?'bg-white/20':'bg-gray-300'}`}))
+                                ),
+                                React.createElement('span',{className:`text-xs ${dark?'text-white/80':'text-gray-600'}`},`Thập ${dec}/5`)
+                            )
+                        ),
+                        React.createElement('div',{className:'space-y-3 mb-6'},
+                            React.createElement('button',{onClick:next,className:`w-full bg-gradient-to-r ${cm.color} text-white font-medium py-4 rounded-xl shadow-md`},s===25?'Hoàn Thành':'Tiếp Theo'),
+                            React.createElement('div',{className:'grid grid-cols-3 gap-3'},
+                                React.createElement('button',{onClick:()=>{setS(0);setBc(0);setDec(0);},className:`${dark?'bg-white/10 border-white/20':'bg-gray-200 border-gray-300'} hover:opacity-80 ${txt} font-semibold py-3 rounded-xl border text-sm`},'🔄 Reset'),
+                                React.createElement('button',{onClick:()=>setShowP(!showP),className:`${dark?'bg-white/10 border-white/20':'bg-gray-200 border-gray-300'} hover:opacity-80 ${txt} font-semibold py-3 rounded-xl border text-sm`},'📖 Kinh'),
+                                React.createElement('button',{onClick:shareText,className:`${dark?'bg-white/10 border-white/20':'bg-gray-200 border-gray-300'} hover:opacity-80 ${txt} font-semibold py-3 rounded-xl border text-sm`},'📤 Chia sẻ')
+                            )
+                        ),
+                        React.createElement('div',{className:`${dark?'bg-white/5 border-white/10':'bg-gray-50 border-gray-200'} rounded-xl p-4 border mb-4`},
+                            React.createElement('label',{className:`${dark?'text-white/70':'text-gray-600'} text-xs mb-2 block`},'Chọn Mầu Nhiệm:'),
+                            React.createElement('select',{value:mys,onChange:e=>setMys(e.target.value),className:`w-full ${dark?'bg-white/10 border-white/20':'bg-white border-gray-300'} ${txt} border rounded-lg px-3 py-2 text-sm focus:outline-none`},
+                                Object.keys(M).map(m=>React.createElement('option',{key:m,value:m,className:dark?'bg-purple-900':'bg-white'},`${m} - ${M[m].days}`))
+                            ),
+                            React.createElement('button',{onClick:()=>setShowM(true),className:`w-full mt-2 ${dark?'bg-white/5':'bg-gray-100'} ${txt} text-xs py-2 rounded-lg hover:opacity-80`},`📖 Xem 5 Sự ${mys.replace('Mầu Nhiệm ','')}`)
+                        ),
+                        React.createElement('div',{className:'flex gap-2 mb-4'},
+                            React.createElement('button',{onClick:()=>setSound(!sound),className:`flex-1 ${sound?(dark?'bg-blue-500/30':'bg-blue-200'):dark?'bg-white/10':'bg-gray-200'} hover:opacity-80 ${txt} py-2 rounded-lg border ${dark?'border-white/20':'border-gray-300'} text-xs`},sound?'🔊 Âm thanh':'🔇 Âm thanh'),
+                            React.createElement('button',{onClick:()=>setVib(!vib),className:`flex-1 ${vib?(dark?'bg-blue-500/30':'bg-blue-200'):dark?'bg-white/10':'bg-gray-200'} hover:opacity-80 ${txt} py-2 rounded-lg border ${dark?'border-white/20':'border-gray-300'} text-xs`},'📳 Rung')
+                        ),
+                        hist.length>0&&React.createElement('div',{className:`${dark?'bg-white/5 border-white/10':'bg-gray-50 border-gray-200'} rounded-xl p-4 border mb-4`},
+                            React.createElement('h3',{className:`${dark?'text-white/70':'text-gray-600'} text-xs mb-2`},'Lịch Sử:'),
+                            React.createElement('div',{className:'space-y-2 max-h-32 overflow-y-auto'},
+                                hist.map((h,i)=>React.createElement('div',{key:i,className:`text-xs ${dark?'text-white/60':'text-gray-600'} flex justify-between`},
+                                    React.createElement('span',null,`✅ ${h.mystery}`),
+                                    React.createElement('span',null,h.date)
+                                ))
+                            )
+                        ),
+                        React.createElement('div',{className:'text-center'},
+                            React.createElement('p',{className:`${dark?'text-white/50':'text-gray-400'} text-xs`},'"Lạy Mẹ Maria, xin cầu cho chúng con"')
+                        )
+                    )
+                ),
+showP&&React.createElement('div',{className:'fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50',onClick:()=>setShowP(false)},
+                    React.createElement('div',{className:`${dark?'bg-gradient-to-br from-blue-900 to-purple-900':'bg-white'} rounded-3xl p-6 max-w-lg w-full max-h-[80vh] overflow-y-auto border ${dark?'border-white/20':'border-gray-200'}`,onClick:e=>e.stopPropagation()},
+                        React.createElement('div',{className:'flex justify-between items-center mb-4'},
+                            React.createElement('h2',{className:`text-2xl font-bold ${txt}`},'Các Kinh Nguyện'),
+                            React.createElement('button',{onClick:()=>setShowP(false),className:`${dark?'text-white/70':'text-gray-600'} text-2xl font-bold`},'×')
+                        ),
+                        React.createElement('div',{className:'space-y-6'},
+                            Object.entries(P).map(([t,p])=>React.createElement('div',{key:t,className:`${dark?'bg-white/10 border-white/20':'bg-gray-50 border-gray-200'} rounded-xl p-4 border`},
+                                React.createElement('h3',{className:`text-lg font-semibold ${dark?'text-yellow-300':'text-blue-600'} mb-2`},t),
+                                React.createElement('p',{className:`${dark?'text-white/90':'text-gray-700'} text-sm leading-relaxed`},p)
+                            ))
+                        )
+                    )
+                ),
+                showM&&React.createElement('div',{className:'fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50',onClick:()=>setShowM(false)},
+                    React.createElement('div',{className:`${dark?'bg-gradient-to-br from-blue-900 to-purple-900':'bg-white'} rounded-3xl p-6 max-w-lg w-full max-h-[80vh] overflow-y-auto border ${dark?'border-white/20':'border-gray-200'}`,onClick:e=>e.stopPropagation()},
+                        React.createElement('div',{className:'flex justify-between items-center mb-4'},
+                            React.createElement('h2',{className:`text-2xl font-bold ${txt}`},`5 Sự ${mys.replace('Mầu Nhiệm ','')}`),
+                            React.createElement('button',{onClick:()=>setShowM(false),className:`${dark?'text-white/70':'text-gray-600'} text-2xl font-bold`},'×')
+                        ),
+                        React.createElement('div',{className:'space-y-4'},
+                            cm.items.map((item,idx)=>React.createElement('div',{key:idx,className:`${dark?'bg-white/10 border-white/20':'bg-gray-50 border-gray-200'} rounded-xl p-4 border`},
+                                React.createElement('p',{className:`${dark?'text-white/90':'text-gray-700'} text-sm leading-relaxed`},`Thứ ${idx+1}: ${item}`)
+                            ))
+                        )
+                    )
+                ),
+                share&&React.createElement('div',{className:'fixed bottom-4 left-1/2 transform -translate-x-1/2 bg-green-500 text-white px-6 py-3 rounded-full shadow-lg z-50 animate-bounce'},'✅ Đã sao chép!')
+            );
+        }
+        ReactDOM.render(React.createElement(App),document.getElementById('root'));
+    </script>
+    
+    <script>
+        if('serviceWorker' in navigator){
+            window.addEventListener('load',()=>{
+                navigator.serviceWorker.register('/service-worker.js')
+                    .then(reg=>console.log('SW registered:',reg.scope))
+                    .catch(err=>console.log('SW registration failed:',err));
+            });
+        }
+        let deferredPrompt;
+        window.addEventListener('beforeinstallprompt',e=>{
+            e.preventDefault();
+            deferredPrompt=e;
+            console.log('PWA install prompt ready');
+        });
+        window.addEventListener('appinstalled',()=>{
+            console.log('PWA installed successfully');
+            deferredPrompt=null;
+        });
+    </script>
+</body>
+</html>
