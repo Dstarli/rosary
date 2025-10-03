@@ -65,8 +65,6 @@ function App(){
                 
                 return 'Mầu Nhiệm Vui';
             };
-            
-            const [s,setS]=useState(0),[bc,setBc]=useState(0),[dec,setDec]=useState(0),[mys,setMys]=useState(getDefaultMystery()),[vib,setVib]=useState(true),[showP,setShowP]=useState(false),[showM,setShowM]=useState(false),[hist,setHist]=useState([]),[dark,setDark]=useState(true),[share,setShare]=useState(false),[notif,setNotif]=useState(false),[total,setTotal]=useState(0),[streak,setStreak]=useState(0),[showCredit,setShowCredit]=useState(false),[fontSize,setFontSize]=useState(13);
            
             useEffect(()=>{
                 const saved=localStorage.getItem('rosaryData');
@@ -97,7 +95,6 @@ function App(){
                     if(s<25){
                         setS(s+1);setBc(0);
                         if(s>=4&&s<24&&(s-4)%4===3)setDec(Math.floor((s-4)/4)+1);
-                        if(s===24&&'vibrate'in navigator)navigator.vibrate([200,100,200,100,200]);
                     }else{
                         const sess={mystery:mys,date:new Date().toLocaleString('vi-VN'),completed:true};
                         const newH=[sess,...hist.slice(0,9)],newT=total+1,newS=streak+1;
@@ -106,7 +103,6 @@ function App(){
                         setS(0);setBc(0);setDec(0);
                     }
                 }else{setBc(bc+1);}
-                if(vib&&'vibrate'in navigator)navigator.vibrate(30);
             };
             const shareText=()=>{
                 const txt=`  Tôi vừa lần Mân Côi (${mys})!\n\n📊 Tổng: ${total} lần\n🔥 Chuỗi: ${streak} ngày\n\n#MânCôi`;
@@ -182,7 +178,6 @@ return React.createElement('div',{className:`min-h-screen ${bg} flex items-cente
                             React.createElement('button',{onClick:()=>setShowM(true),className:`w-full mt-2 ${dark?'bg-white/5':'bg-gray-100'} ${txt} text-xs py-2 rounded-lg hover:opacity-80`},`📖 Xem 5 Sự ${mys.replace('Mầu Nhiệm ','')}`)
                         ),
                         React.createElement('div',{className:'flex gap-2 mb-4'},
-                            React.createElement('button',{onClick:()=>setVib(!vib),className:`flex-1 ${vib?(dark?'bg-blue-500/30':'bg-blue-200'):dark?'bg-white/10':'bg-gray-200'} hover:opacity-80 ${txt} py-2 rounded-lg border ${dark?'border-white/20':'border-gray-300'} text-xs`},'📳 Rung'),
                             React.createElement('select',{value:fontSize,onChange:e=>{const newSize=parseInt(e.target.value);setFontSize(newSize);const saved=localStorage.getItem('rosaryData');const data=saved?JSON.parse(saved):{};localStorage.setItem('rosaryData',JSON.stringify({...data,fontSize:newSize}));},className:`flex-1 ${dark?'bg-white/10 border-white/20':'bg-white border-gray-300'} ${txt} border rounded-lg px-3 py-2 text-xs focus:outline-none`},
                                 React.createElement('option',{value:13,className:dark?'bg-purple-900':'bg-white'},'🔤 Chữ 13pt'),
                                 React.createElement('option',{value:15,className:dark?'bg-purple-900':'bg-white'},'🔤 Chữ 15pt')
@@ -270,3 +265,4 @@ return React.createElement('div',{className:`min-h-screen ${bg} flex items-cente
     </script>
 </body>
 </html>
+
