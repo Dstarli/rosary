@@ -91,12 +91,6 @@ function App(){
                 ];
                 return dSteps[sInD];
             };
-            const playSound=()=>{
-                const ctx=new(window.AudioContext||window.webkitAudioContext)(),osc=ctx.createOscillator(),gain=ctx.createGain();
-                osc.connect(gain);gain.connect(ctx.destination);osc.frequency.value=600;osc.type='sine';
-                gain.gain.setValueAtTime(.15,ctx.currentTime);gain.gain.exponentialRampToValueAtTime(.01,ctx.currentTime+.15);
-                osc.start(ctx.currentTime);osc.stop(ctx.currentTime+.15);
-            };
             const next=()=>{
                 const cur=getStep();
                 if(cur.c===0||bc+1>=cur.c){
@@ -112,7 +106,6 @@ function App(){
                         setS(0);setBc(0);setDec(0);
                     }
                 }else{setBc(bc+1);}
-                playSound();
                 if(vib&&'vibrate'in navigator)navigator.vibrate(30);
             };
             const shareText=()=>{
