@@ -19,6 +19,9 @@
         .animate-pulse{animation:pulse 2s cubic-bezier(.4,0,.6,1) infinite}
         .animate-bounce{animation:bounce 1s infinite}
         .fade-slide{animation:fadeSlideIn 0.4s ease-out}
+        .text-size-small{font-size:13pt;line-height:1.5}
+        .text-size-medium{font-size:14pt;line-height:1.6}
+        .text-size-large{font-size:18pt;line-height:1.7}
         .prayer-container{
             height:450px;
             display:flex;
@@ -136,11 +139,11 @@
 // PHẦN 2/3 - Dán tiếp sau Phần 1
 
         function App(){
-            const [s,setS]=useState(0),[bc,setBc]=useState(0),[dec,setDec]=useState(0),[mys,setMys]=useState('Mầu Nhiệm Vui'),[showP,setShowP]=useState(false),[showM,setShowM]=useState(false),[showCredit,setShowCredit]=useState(false),[hist,setHist]=useState([]),[dark,setDark]=useState(true),[share,setShare]=useState(false),[notif,setNotif]=useState(false),[total,setTotal]=useState(0),[streak,setStreak]=useState(0),[lang,setLang]=useState('vi');
+            const [s,setS]=useState(0),[bc,setBc]=useState(0),[dec,setDec]=useState(0),[mys,setMys]=useState('Mầu Nhiệm Vui'),[showP,setShowP]=useState(false),[showM,setShowM]=useState(false),[showCredit,setShowCredit]=useState(false),[hist,setHist]=useState([]),[dark,setDark]=useState(true),[share,setShare]=useState(false),[notif,setNotif]=useState(false),[total,setTotal]=useState(0),[streak,setStreak]=useState(0),[lang,setLang]=useState('vi'),[fontSize,setFontSize]=useState('medium');
            
             useEffect(()=>{
                 const saved=localStorage.getItem('rosaryData');
-                if(saved){const d=JSON.parse(saved);setHist(d.history||[]);setTotal(d.totalPrayers||0);setStreak(d.streak||0);setLang(d.language||'vi');}
+                if(saved){const d=JSON.parse(saved);setHist(d.history||[]);setTotal(d.totalPrayers||0);setStreak(d.streak||0);setLang(d.language||'vi');setFontSize(d.fontSize||'medium');}
             },[]);
 
             const t=translations[lang];
@@ -179,7 +182,7 @@
                         const sess={mystery:currentMysKey,date:new Date().toLocaleString(lang==='vi'?'vi-VN':'en-US'),completed:true};
                         const newH=[sess,...hist.slice(0,9)],newT=total+1,newS=streak+1;
                         setHist(newH);setTotal(newT);setStreak(newS);
-                        localStorage.setItem('rosaryData',JSON.stringify({history:newH,totalPrayers:newT,streak:newS,language:lang}));
+                        localStorage.setItem('rosaryData',JSON.stringify({history:newH,totalPrayers:newT,streak:newS,language:lang,fontSize:fontSize}));
                         setS(0);setBc(0);setDec(0);
                     }
                 }else{setBc(bc+1);}
@@ -204,6 +207,19 @@
                 }
             };
             
+            const toggleFontSize=()=>{
+                const sizes=['small','medium','large'];
+                const idx=sizes.indexOf(fontSize);
+                const newSize=sizes[(idx+1)%3];
+                setFontSize(newSize);
+                const saved=localStorage.getItem('rosaryData');
+                if(saved){
+                    const d=JSON.parse(saved);
+                    d.fontSize=newSize;
+                    localStorage.setItem('rosaryData',JSON.stringify(d));
+                }
+            };
+            
             const cur=getStep(),cm=M[currentMysKey],prog=(s/25)*100;
             const bg=dark?'bg-gradient-to-br from-blue-900 via-purple-900 to-indigo-900':'bg-gradient-to-br from-blue-100 via-purple-100 to-pink-100';
             const card=dark?'bg-white/10 border-white/20':'bg-white/80 border-gray-200';
@@ -219,6 +235,7 @@ return React.createElement('div',{className:`min-h-screen ${bg} flex items-cente
                             React.createElement('div',{className:'flex gap-2'},
                                 React.createElement('button',{onClick:()=>setDark(!dark),className:`${dark?'bg-white/10':'bg-gray-200'} hover:opacity-80 ${txt} p-2 rounded-lg border ${dark?'border-white/20':'border-gray-300'}`},dark?'🌙':'☀️'),
                                 React.createElement('button',{onClick:toggleLang,className:`${dark?'bg-white/10':'bg-gray-200'} hover:opacity-80 ${txt} px-3 py-2 rounded-lg border ${dark?'border-white/20':'border-gray-300'} text-sm font-semibold`},lang==='vi'?'EN':'VI'),
+                                React.createElement('button',{onClick:toggleFontSize,className:`${dark?'bg-white/10':'bg-gray-200'} hover:opacity-80 ${txt} px-3 py-2 rounded-lg border ${dark?'border-white/20':'border-gray-300'} text-sm font-semibold`},fontSize==='small'?'A-':fontSize==='large'?'A+':'Aa'),
                                 React.createElement('button',{onClick:()=>notif?setNotif(false):Notification.requestPermission().then(p=>setNotif(p==='granted')),className:`${dark?'bg-white/10':'bg-gray-200'} hover:opacity-80 ${txt} p-2 rounded-lg border ${dark?'border-white/20':'border-gray-300'}`},notif?'🔔':'🔕')
                             ),
                             React.createElement('div',{className:'text-right'},
@@ -239,13 +256,13 @@ return React.createElement('div',{className:`min-h-screen ${bg} flex items-cente
                         React.createElement('div',{className:`${dark?'bg-white/5':'bg-gray-50'} rounded-2xl p-6 mb-6 border ${dark?'border-white/10':'border-gray-200'} prayer-container`},
                             React.createElement('div',{key:s,className:'prayer-content-scroll fade-slide'},
                                 React.createElement('div',{className:'text-center mb-4'},
-                                    React.createElement('div',{className:'text-6xl mb-2'},cur.e),
+                                    cur.e==='🌟'&&React.createElement('div',{className:'text-6xl mb-2'},cur.e),
                                     React.createElement('div',{className:`${txt} text-lg font-semibold mb-2`},cur.i),
                                     cur.c>1&&React.createElement('div',{className:`${txt2} text-3xl font-bold mb-3`},`${bc+1} / ${cur.c}`),
                                     s===25&&React.createElement('div',{className:'text-yellow-400 font-bold text-xl animate-bounce mt-2'},`✨ ${t.ui.completed} ✨`)
                                 ),
                                 cur.p&&cur.p!=='mystery'&&React.createElement('div',{className:`${dark?'bg-white/5 border-white/10':'bg-white border-gray-200'} rounded-xl p-4 border`},
-                                    React.createElement('p',{className:`${dark?'text-white/80':'text-gray-700'} text-sm leading-relaxed text-center prayer-text`,style:{whiteSpace:'pre-line'}},
+                                    React.createElement('p',{className:`${dark?'text-white/80':'text-gray-700'} leading-relaxed text-center prayer-text text-size-`+fontSize,style:{whiteSpace:'pre-line'}},
                                         cur.p===Object.keys(P)[3]&&s>=4&&s<24&&(s-4)%4===3
                                             ? P[cur.p]+'\n\n'+Object.keys(P)[5]+':\n'+P[Object.keys(P)[5]]
                                             : P[cur.p]
@@ -325,7 +342,7 @@ return React.createElement('div',{className:`min-h-screen ${bg} flex items-cente
                             React.createElement('div',{className:'text-6xl mb-4'},'❤️'),
                             React.createElement('h3',{className:`text-xl font-semibold ${txt} mb-3`},lang==='vi'?'Cám ơn mọi người':'Thank You'),
                             React.createElement('p',{className:`${dark?'text-white/80':'text-gray-700'} text-sm leading-relaxed mb-4`},lang==='vi'?'Cảm ơn bạn đã sử dụng ứng dụng Mân Côi. Xin Đức Mẹ Maria luôn phù hộ và ban phước lành cho bạn và gia đình.':'Thank you for using the Holy Rosary app. May the Blessed Virgin Mary always protect and bless you and your family.'),
-                            React.createElement('div',{className:`${dark?'text-blue-300':'text-blue-600'} text-xs mt-4 pt-4 border-t ${dark?'border-white/20':'border-gray-200'}`},'Version 2.3 • Developer: Hứa Hoàng Thiện')
+                            React.createElement('div',{className:`${dark?'text-blue-300':'text-blue-600'} text-xs mt-4 pt-4 border-t ${dark?'border-white/20':'border-gray-200'}`},'Version 2.6 • Developer: Hứa Hoàng Thiện')
                         )
                     )
                 ),
