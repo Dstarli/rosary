@@ -17,6 +17,29 @@
         @keyframes bounce{0%,100%{transform:translateY(-25%)}50%{transform:translateY(0)}}
         .animate-pulse{animation:pulse 2s cubic-bezier(.4,0,.6,1) infinite}
         .animate-bounce{animation:bounce 1s infinite}
+        .prayer-container{
+            min-height:clamp(400px,55vh,550px);
+            transition:all 0.3s cubic-bezier(0.4,0,0.2,1);
+        }
+        .prayer-text{
+            max-height:250px;
+            overflow-y:auto;
+            padding-right:8px;
+        }
+        .prayer-text::-webkit-scrollbar{
+            width:6px;
+        }
+        .prayer-text::-webkit-scrollbar-track{
+            background:rgba(255,255,255,0.1);
+            border-radius:3px;
+        }
+        .prayer-text::-webkit-scrollbar-thumb{
+            background:rgba(255,255,255,0.3);
+            border-radius:3px;
+        }
+        .prayer-text::-webkit-scrollbar-thumb:hover{
+            background:rgba(255,255,255,0.5);
+        }
     </style>
 </head>
 <body>
@@ -102,9 +125,8 @@
             }
         };
 
-// KẾT THÚC PHẦN 1 - Tiếp tục với Phần 2// PHẦN 2/3 - Dán tiếp sau Phần 1
-
-      // PHẦN 2/3 - Dán tiếp sau Phần 1
+// KẾT THÚC PHẦN 1 - Tiếp tục với Phần 2
+// PHẦN 2/3 - Dán tiếp sau Phần 1
 
         function App(){
             const [s,setS]=useState(0),[bc,setBc]=useState(0),[dec,setDec]=useState(0),[mys,setMys]=useState('Mầu Nhiệm Vui'),[showP,setShowP]=useState(false),[showM,setShowM]=useState(false),[showCredit,setShowCredit]=useState(false),[hist,setHist]=useState([]),[dark,setDark]=useState(true),[share,setShare]=useState(false),[notif,setNotif]=useState(false),[total,setTotal]=useState(0),[streak,setStreak]=useState(0),[lang,setLang]=useState('vi');
@@ -207,7 +229,7 @@ return React.createElement('div',{className:`min-h-screen ${bg} flex items-cente
                         React.createElement('div',{className:`${dark?'bg-white/5':'bg-gray-200'} rounded-full h-2 mb-6`},
                             React.createElement('div',{className:`bg-gradient-to-r ${cm.color} h-2 rounded-full transition-all duration-300`,style:{width:`${prog}%`}})
                         ),
-                        React.createElement('div',{className:`${dark?'bg-white/5':'bg-gray-50'} rounded-2xl p-6 mb-6 border ${dark?'border-white/10':'border-gray-200'}`},
+                        React.createElement('div',{className:`${dark?'bg-white/5':'bg-gray-50'} rounded-2xl p-6 mb-6 border ${dark?'border-white/10':'border-gray-200'} prayer-container`},
                             React.createElement('div',{className:'text-center mb-4'},
                                 React.createElement('div',{className:'text-6xl mb-2'},cur.e),
                                 React.createElement('div',{className:`${txt} text-lg font-semibold mb-2`},cur.i),
@@ -215,7 +237,7 @@ return React.createElement('div',{className:`min-h-screen ${bg} flex items-cente
                                 s===25&&React.createElement('div',{className:'text-yellow-400 font-bold text-xl animate-bounce mt-2'},`✨ ${t.ui.completed} ✨`)
                             ),
                             cur.p&&cur.p!=='mystery'&&React.createElement('div',{className:`${dark?'bg-white/5 border-white/10':'bg-white border-gray-200'} rounded-xl p-4 border`},
-                                React.createElement('p',{className:`${dark?'text-white/80':'text-gray-700'} text-sm leading-relaxed text-center`},P[cur.p]),
+                                React.createElement('p',{className:`${dark?'text-white/80':'text-gray-700'} text-sm leading-relaxed text-center prayer-text`},P[cur.p]),
                                 cur.p===Object.keys(P)[3]&&s>=4&&s<24&&(s-4)%4===3&&React.createElement('div',{className:`${dark?'text-blue-300':'text-blue-600'} text-sm mt-3 pt-3 border-t ${dark?'border-white/10':'border-gray-200'}`},
                                     React.createElement('p',{className:'font-semibold mb-1'},Object.keys(P)[5]+':'),
                                     React.createElement('p',{className:'leading-relaxed'},P[Object.keys(P)[5]])
