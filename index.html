@@ -12,143 +12,93 @@
     <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    
     <style>
         @keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}}
         @keyframes bounce{0%,100%{transform:translateY(-25%)}50%{transform:translateY(0)}}
         @keyframes fadeSlideIn{from{opacity:0;transform:translateX(20px)}to{opacity:1;transform:translateX(0)}}
+        @keyframes buttonPress{0%{transform:scale(1)}50%{transform:scale(0.95)}100%{transform:scale(1)}}
+        @keyframes ripple{0%{transform:scale(0);opacity:1}100%{transform:scale(4);opacity:0}}
         .animate-pulse{animation:pulse 2s cubic-bezier(.4,0,.6,1) infinite}
         .animate-bounce{animation:bounce 1s infinite}
         .fade-slide{animation:fadeSlideIn 0.4s ease-out}
+        .button-press{animation:buttonPress 0.3s ease-out}
         .text-size-small{font-size:13pt;line-height:1.5}
         .text-size-medium{font-size:14pt;line-height:1.6}
         .text-size-large{font-size:18pt;line-height:1.7}
-        .prayer-container{
-            height:450px;
-            display:flex;
-            flex-direction:column;
-        }
-        .prayer-content-scroll{
-            flex:1;
-            overflow-y:auto;
-            margin-bottom:16px;
-            padding-right:4px;
-        }
-        .prayer-content-scroll::-webkit-scrollbar{
-            width:6px;
-        }
-        .prayer-content-scroll::-webkit-scrollbar-track{
-            background:rgba(255,255,255,0.1);
-            border-radius:3px;
-        }
-        .prayer-content-scroll::-webkit-scrollbar-thumb{
-            background:rgba(255,255,255,0.3);
-            border-radius:3px;
-        }
-        .prayer-content-scroll::-webkit-scrollbar-thumb:hover{
-            background:rgba(255,255,255,0.5);
-        }
-        .prayer-text{
-            max-height:none;
-        }
+        .prayer-container{height:450px;display:flex;flex-direction:column}
+        .prayer-content-scroll{flex:1;overflow-y:auto;margin-bottom:16px;padding-right:4px}
+        .prayer-content-scroll::-webkit-scrollbar{width:6px}
+        .prayer-content-scroll::-webkit-scrollbar-track{background:rgba(255,255,255,0.1);border-radius:3px}
+        .prayer-content-scroll::-webkit-scrollbar-thumb{background:rgba(255,255,255,0.3);border-radius:3px}
+        .prayer-content-scroll::-webkit-scrollbar-thumb:hover{background:rgba(255,255,255,0.5)}
+        .prayer-text{max-height:none}
+        .btn-action{position:relative;overflow:hidden;transition:all 0.3s cubic-bezier(0.4, 0, 0.2, 1)}
+        .btn-action:active{transform:scale(0.95)}
+        .btn-action:hover{transform:translateY(-2px);box-shadow:0 10px 20px rgba(0,0,0,0.2)}
+        .ripple-effect{position:absolute;border-radius:50%;background:rgba(255,255,255,0.5);pointer-events:none;animation:ripple 0.6s ease-out}
     </style>
 </head>
 <body>
     <div id="root"></div>
+    
+    <script src="prayers.js"></script>
+    
     <script type="text/babel">
-        const {useState,useEffect}=React;
-        const translations={
-            vi:{
-                mysteries:{
-                    'Mầu Nhiệm Vui':{days:'Thứ 2, Thứ 7',color:'from-yellow-400 to-orange-500',items:['Thiên thần truyền tin cho Đức Bà chịu thai. Ta hãy xin cho được ở khiêm nhường.','Đức Bà đi viếng Bà Thánh Isave. Ta hãy xin cho được lòng yêu người.','Đức Bà sinh Đức Chúa Giêsu trong hang đá. Ta hãy xin cho được lòng khó khăn.','Đức Bà dâng Đức Chúa Giêsu trong đền Thánh. Ta hãy xin cho được vâng lời chịu lụy.','Đức Bà tìm được Đức Chúa Giêsu trong Đền thánh. Ta hãy xin cho được giữ nghĩa cùng Chúa luôn.']},
-                    'Mầu Nhiệm Thương':{days:'Thứ 3, Thứ 6',color:'from-red-400 to-rose-500',items:['Đức Chúa Giêsu lo buồn đổ mồ hôi máu. Ta hãy xin cho được ăn năn tội nên.','Đức Chúa Giêsu chịu đánh đòn. Ta hãy xin cho được hãm mình chịu khó bằng lòng.','Đức Chúa Giêsu chịu đội mão gai. Ta hãy xin cho được chịu mọi sự sỉ nhục bằng lòng.','Đức Chúa Giêsu vác Thánh Giá. Ta hãy xin cho được vác Thánh Giá theo chân Chúa.','Đức Chúa Giêsu chịu chết trên cây Thánh Giá. Ta hãy xin đóng đanh tính xác thịt vào Thánh Giá Chúa.']},
-                    'Mầu Nhiệm Mừng':{days:'Thứ 4, Chủ Nhật',color:'from-amber-400 to-yellow-500',items:['Đức Chúa Giêsu sống lại. Ta hãy xin cho được sống lại thật về phần linh hồn.','Đức Chúa Giêsu lên trời. Ta hãy xin cho được ái mộ những sự trên trời.','Đức Chúa Thánh Thần hiện xuống. Ta hãy xin cho được lòng đầy dẫy mọi ơn Đức Chúa Thánh Thần.','Đức Chúa Trời cho Đức Bà lên trời. Ta hãy xin ơn chết lành trong tay Đức Mẹ.','Đức Chúa Trời thưởng Đức Mẹ trên trời. Ta hãy xin Đức Mẹ phù hộ cho ta được thưởng cùng Đức Mẹ trên nước thiên đàng.']},
-                    'Mầu Nhiệm Sáng':{days:'Thứ 5',color:'from-blue-400 to-cyan-500',items:['Đức Chúa Giêsu chịu phép Rửa tại sông Giodan. Ta hãy xin cho được sống xứng đáng là con cái Chúa.','Đức Chúa Giêsu dự tiệc cưới Cana. Ta hãy xin cho được vững tin vào quyền năng của Ngài.','Đức Chúa Giêsu rao giảng Nước Trời. Ta hãy xin cho được hoán cải và đón nhận Tin Mừng.','Đức Chúa Giêsu biến hình trên núi. Ta hãy xin cho được lắng nghe và thực hành lời Chúa.','Đức Chúa Giêsu lập bí tích Thánh Thể. Ta hãy xin cho được năng kết hiệp cùng Chúa Giêsu Thánh Thể.']}
-                },
-                prayers:{
-                    'Kinh Tin Kính':'Tôi tin kính Đức Chúa Trời là Cha phép tắc vô cùng dựng nên trời đất. Tôi tin kính Đức Chúa GiêSu Kitô là con một Đức Chúa Cha cùng là Chúa chúng tôi; bởi phép Đức Chúa Thánh Thần mà người xuống thai, sinh bởi Bà Maria đồng trinh: chịu nạn đời quan Phong-xi-ô Phi-la-tô, chịu đóng đanh trên cây Thánh Giá, chết và táng xác, xuống ngục tổ tông, ngày thứ ba bởi trong kẻ chết sống lại; lên trời ngự bên hữu Đức Chúa Cha phép tắc vô cùng; ngày sau bởi trời lại xuống phán xét kẻ sống và kẻ chết. Tôi tin kính Đức Chúa Thánh Thần. Tôi tin có hội Thánh hằng có ở khắp thế này, các Thánh thông công. Tôi tin phép tha tội tôi tin xác loài người ngày sau sống lại. Tôi tin hằng sống vậy, Amen.',
-                    'Kinh Lạy Cha':'Lạy Cha chúng con ở trên trời, chúng con nguyện danh Cha cả sáng, nước Cha trị đến, ý Cha thể hiện dưới đất cũng như trên trời. Xin Cha cho chúng con hôm nay lương thực hằng ngày và tha nợ chúng con như chúng con cũng tha kẻ có nợ chúng con. Xin chớ để chúng con sa chước cám dỗ, nhưng cứu chúng con cho khỏi mọi sự dữ. Amen.',
-                    'Kinh Kính Mừng':'Kính mừng Maria đầy ơn phúc, Đức Chúa Trời ở cùng Bà, Bà có phúc lạ hơn mọi người nữ, và Giêsu con lòng Bà gồm phúc lạ. Thánh Maria Đức Mẹ Chúa Trời, cầu cho chúng con là kẻ có tội khi này và trong giờ lâm tử. Amen.',
-                    'Kinh Sáng Danh':'Sáng danh Đức Chúa Cha, và Đức Chúa Con, và Đức Chúa Thánh Thần. Như đã có trước vô cùng, và bây giờ, và hằng có, và đời đời chẳng cùng. Amen.',
-                    'Kinh Lạy Nữ Vương':'Lạy Nữ Vương, Mẹ nhân lành, làm cho chúng con được sống, được vui, được cậy, thân lạy Mẹ. Chúng con là con cái Eva ở chốn khách đày này, kêu đến cùng Bà. Than van kêu khóc trong nơi khóc lóc khổ nầy. Ôi! Lạy Chúa báu chúng con, xin ghé mặt thương xem chúng con. Đến sau khỏi đây, xin cho chúng con được thấy Đức Chúa Giêsu, Con lòng Bà gồm phúc lạ. Ôi khoan thay! Nhân thay! Dịu thay! Thánh Maria trọn đời đồng trinh. Amen.',
-                    'Lời Nguyện Mân Côi':'Lạy Chúa Giêsu, xin tha tội cho chúng con, xin cứu chúng con khỏi sa hỏa ngục, xin đem các linh hồn lên thiên đàng, nhất là những linh hồn cần đến lòng Chúa thương xót hơn. Amen.'
-                },
-                ui:{
-                    title:'Lần Hạt Mân Côi',
-                    total:'Tổng cộng',
-                    days:'ngày',
-                    next:'Tiếp Theo',
-                    complete:'Hoàn Thành',
-                    completed:'Hoàn Thành Chuỗi Mân Côi!',
-                    reset:'Reset',
-                    prayers:'Kinh',
-                    share:'Chia sẻ',
-                    selectMystery:'Chọn Mầu Nhiệm:',
-                    view5Mysteries:'Xem 5 Sự',
-                    history:'Lịch Sử:',
-                    quote:'"Lạy Mẹ Maria, xin cầu cho chúng con"',
-                    prayersTitle:'Các Kinh Nguyện',
-                    decade:'Thập',
-                    copied:'Đã sao chép!',
-                    mysteryPrefix:'Mầu Nhiệm Thứ',
-                    signCross:'Làm Dấu Thánh Giá và đọc',
-                    read:'Đọc',
-                    and:'và'
-                }
+        const {useState,useEffect,useRef}=React;
+        
+        const mysteriesData = {
+            vi: {
+                'Mầu Nhiệm Vui':{days:'Thứ 2, Thứ 7',color:'from-yellow-400 to-orange-500',items:['Thiên thần truyền tin cho Đức Bà chịu thai. Ta hãy xin cho được ở khiêm nhường.','Đức Bà đi viếng Bà Thánh Isave. Ta hãy xin cho được lòng yêu người.','Đức Bà sinh Đức Chúa Giêsu trong hang đá. Ta hãy xin cho được lòng khó khăn.','Đức Bà dâng Đức Chúa Giêsu trong đền Thánh. Ta hãy xin cho được vâng lời chịu lụy.','Đức Bà tìm được Đức Chúa Giêsu trong Đền thánh. Ta hãy xin cho được giữ nghĩa cùng Chúa luôn.']},
+                'Mầu Nhiệm Thương':{days:'Thứ 3, Thứ 6',color:'from-red-400 to-rose-500',items:['Đức Chúa Giêsu lo buồn đổ mồ hôi máu. Ta hãy xin cho được ăn năn tội nên.','Đức Chúa Giêsu chịu đánh đòn. Ta hãy xin cho được hãm mình chịu khó bằng lòng.','Đức Chúa Giêsu chịu đội mão gai. Ta hãy xin cho được chịu mọi sự sỉ nhục bằng lòng.','Đức Chúa Giêsu vác Thánh Giá. Ta hãy xin cho được vác Thánh Giá theo chân Chúa.','Đức Chúa Giêsu chịu chết trên cây Thánh Giá. Ta hãy xin đóng đanh tính xác thịt vào Thánh Giá Chúa.']},
+                'Mầu Nhiệm Mừng':{days:'Thứ 4, Chủ Nhật',color:'from-amber-400 to-yellow-500',items:['Đức Chúa Giêsu sống lại. Ta hãy xin cho được sống lại thật về phần linh hồn.','Đức Chúa Giêsu lên trời. Ta hãy xin cho được ái mộ những sự trên trời.','Đức Chúa Thánh Thần hiện xuống. Ta hãy xin cho được lòng đầy dẫy mọi ơn Đức Chúa Thánh Thần.','Đức Chúa Trời cho Đức Bà lên trời. Ta hãy xin ơn chết lành trong tay Đức Mẹ.','Đức Chúa Trời thưởng Đức Mẹ trên trời. Ta hãy xin Đức Mẹ phù hộ cho ta được thưởng cùng Đức Mẹ trên nước thiên đàng.']},
+                'Mầu Nhiệm Sáng':{days:'Thứ 5',color:'from-blue-400 to-cyan-500',items:['Đức Chúa Giêsu chịu phép Rửa tại sông Giodan. Ta hãy xin cho được sống xứng đáng là con cái Chúa.','Đức Chúa Giêsu dự tiệc cưới Cana. Ta hãy xin cho được vững tin vào quyền năng của Ngài.','Đức Chúa Giêsu rao giảng Nước Trời. Ta hãy xin cho được hoán cải và đón nhận Tin Mừng.','Đức Chúa Giêsu biến hình trên núi. Ta hãy xin cho được lắng nghe và thực hành lời Chúa.','Đức Chúa Giêsu lập bí tích Thánh Thể. Ta hãy xin cho được năng kết hiệp cùng Chúa Giêsu Thánh Thể.']}
             },
-            en:{
-                mysteries:{
-                    'Joyful Mysteries':{days:'Mon, Sat',color:'from-yellow-400 to-orange-500',items:['The Annunciation. Let us ask for humility.','The Visitation. Let us ask for charity toward our neighbor.','The Nativity. Let us ask for the spirit of poverty.','The Presentation. Let us ask for obedience.','Finding Jesus in the Temple. Let us ask for the grace of fidelity to God.']},
-                    'Sorrowful Mysteries':{days:'Tue, Fri',color:'from-red-400 to-rose-500',items:['The Agony in the Garden. Let us ask for contrition for our sins.','The Scourging at the Pillar. Let us ask for the spirit of mortification.','The Crowning with Thorns. Let us ask for moral courage.','The Carrying of the Cross. Let us ask for patience in trials.','The Crucifixion. Let us ask for final perseverance.']},
-                    'Glorious Mysteries':{days:'Wed, Sun',color:'from-amber-400 to-yellow-500',items:['The Resurrection. Let us ask for faith.','The Ascension. Let us ask for hope and desire for heaven.','The Descent of the Holy Spirit. Let us ask for the gifts of the Holy Spirit.','The Assumption. Let us ask for a happy death.','The Coronation of Mary. Let us ask for the grace of eternal salvation.']},
-                    'Luminous Mysteries':{days:'Thu',color:'from-blue-400 to-cyan-500',items:['The Baptism of Jesus. Let us ask to live as children of God.','The Wedding at Cana. Let us ask for faith in God\'s power.','The Proclamation of the Kingdom. Let us ask for conversion and acceptance of the Gospel.','The Transfiguration. Let us ask to listen and follow Christ.','The Institution of the Eucharist. Let us ask for union with Jesus in the Eucharist.']}
-                },
-                prayers:{
-                    'Apostles\' Creed':'I believe in God, the Father almighty, Creator of heaven and earth, and in Jesus Christ, his only Son, our Lord, who was conceived by the Holy Spirit, born of the Virgin Mary, suffered under Pontius Pilate, was crucified, died and was buried; he descended into hell; on the third day he rose again from the dead; he ascended into heaven, and is seated at the right hand of God the Father almighty; from there he will come to judge the living and the dead. I believe in the Holy Spirit, the holy catholic Church, the communion of saints, the forgiveness of sins, the resurrection of the body, and life everlasting. Amen.',
-                    'Our Father':'Our Father, who art in heaven, hallowed be thy name; thy kingdom come; thy will be done on earth as it is in heaven. Give us this day our daily bread; and forgive us our trespasses as we forgive those who trespass against us; and lead us not into temptation, but deliver us from evil. Amen.',
-                    'Hail Mary':'Hail Mary, full of grace, the Lord is with thee; blessed art thou among women, and blessed is the fruit of thy womb, Jesus. Holy Mary, Mother of God, pray for us sinners, now and at the hour of our death. Amen.',
-                    'Glory Be':'Glory be to the Father, and to the Son, and to the Holy Spirit. As it was in the beginning, is now, and ever shall be, world without end. Amen.',
-                    'Hail Holy Queen':'Hail, holy Queen, Mother of mercy, our life, our sweetness and our hope. To thee do we cry, poor banished children of Eve: to thee do we send up our sighs, mourning and weeping in this vale of tears. Turn then, most gracious Advocate, thine eyes of mercy toward us, and after this our exile, show unto us the blessed fruit of thy womb, Jesus. O clement, O loving, O sweet Virgin Mary. Amen.',
-                    'Fatima Prayer':'O my Jesus, forgive us our sins, save us from the fires of hell, and lead all souls to heaven, especially those in most need of thy mercy. Amen.'
-                },
-                ui:{
-                    title:'Holy Rosary',
-                    total:'Total',
-                    days:'days',
-                    next:'Next',
-                    complete:'Complete',
-                    completed:'Rosary Completed!',
-                    reset:'Reset',
-                    prayers:'Prayers',
-                    share:'Share',
-                    selectMystery:'Select Mystery:',
-                    view5Mysteries:'View 5 Mysteries',
-                    history:'History:',
-                    quote:'"Holy Mary, Mother of God, pray for us"',
-                    prayersTitle:'Prayers',
-                    decade:'Decade',
-                    copied:'Copied!',
-                    mysteryPrefix:'Mystery',
-                    signCross:'Sign of the Cross and',
-                    read:'Pray',
-                    and:'and'
-                }
+            en: {
+                'Joyful Mysteries':{days:'Mon, Sat',color:'from-yellow-400 to-orange-500',items:['The Annunciation. Let us ask for humility.','The Visitation. Let us ask for charity toward our neighbor.','The Nativity. Let us ask for the spirit of poverty.','The Presentation. Let us ask for obedience.','Finding Jesus in the Temple. Let us ask for the grace of fidelity to God.']},
+                'Sorrowful Mysteries':{days:'Tue, Fri',color:'from-red-400 to-rose-500',items:['The Agony in the Garden. Let us ask for contrition for our sins.','The Scourging at the Pillar. Let us ask for the spirit of mortification.','The Crowning with Thorns. Let us ask for moral courage.','The Carrying of the Cross. Let us ask for patience in trials.','The Crucifixion. Let us ask for final perseverance.']},
+                'Glorious Mysteries':{days:'Wed, Sun',color:'from-amber-400 to-yellow-500',items:['The Resurrection. Let us ask for faith.','The Ascension. Let us ask for hope and desire for heaven.','The Descent of the Holy Spirit. Let us ask for the gifts of the Holy Spirit.','The Assumption. Let us ask for a happy death.','The Coronation of Mary. Let us ask for the grace of eternal salvation.']},
+                'Luminous Mysteries':{days:'Thu',color:'from-blue-400 to-cyan-500',items:['The Baptism of Jesus. Let us ask to live as children of God.','The Wedding at Cana. Let us ask for faith in God\'s power.','The Proclamation of the Kingdom. Let us ask for conversion and acceptance of the Gospel.','The Transfiguration. Let us ask to listen and follow Christ.','The Institution of the Eucharist. Let us ask for union with Jesus in the Eucharist.']}
+            }
+        };
+        
+        const uiTexts = {
+            vi: {
+                title:'Lần Hạt Mân Côi', total:'Tổng cộng', days:'ngày', next:'Tiếp Theo', prev:'Quay Lại',
+                complete:'Hoàn Thành', completed:'Hoàn Thành Chuỗi Mân Côi!', reset:'Reset', prayers:'Kinh',
+                share:'Chia sẻ', selectMystery:'Chọn Mầu Nhiệm:', view5Mysteries:'Xem 5 Sự',
+                history:'Lịch Sử:', quote:'"Lạy Mẹ Maria, xin cầu cho chúng con"', prayersTitle:'Các Kinh Nguyện',
+                decade:'Thập', copied:'Đã sao chép!', mysteryPrefix:'Mầu Nhiệm Thứ',
+                signCross:'Làm Dấu Thánh Giá và đọc', read:'Đọc', and:'và'
+            },
+            en: {
+                title:'Holy Rosary', total:'Total', days:'days', next:'Next', prev:'Back',
+                complete:'Complete', completed:'Rosary Completed!', reset:'Reset', prayers:'Prayers',
+                share:'Share', selectMystery:'Select Mystery:', view5Mysteries:'View 5 Mysteries',
+                history:'History:', quote:'"Holy Mary, Mother of God, pray for us"', prayersTitle:'Prayers',
+                decade:'Decade', copied:'Copied!', mysteryPrefix:'Mystery',
+                signCross:'Sign of the Cross and', read:'Pray', and:'and'
             }
         };
 
-// KẾT THÚC PHẦN 1 - Tiếp tục với Phần 2
-// PHẦN 2/3 - Dán tiếp sau Phần 1
+        const translations = {
+            vi: { mysteries: mysteriesData.vi, prayers: prayersData.vi, ui: uiTexts.vi },
+            en: { mysteries: mysteriesData.en, prayers: prayersData.en, ui: uiTexts.en }
+        };
 
         function App(){
-            const [s,setS]=useState(0),[bc,setBc]=useState(0),[dec,setDec]=useState(0),[mys,setMys]=useState('Mầu Nhiệm Vui'),[showP,setShowP]=useState(false),[showM,setShowM]=useState(false),[showCredit,setShowCredit]=useState(false),[hist,setHist]=useState([]),[dark,setDark]=useState(true),[share,setShare]=useState(false),[notif,setNotif]=useState(false),[total,setTotal]=useState(0),[streak,setStreak]=useState(0),[lang,setLang]=useState('vi'),[fontSize,setFontSize]=useState('medium');
+            const [s,setS]=useState(0),[bc,setBc]=useState(0),[dec,setDec]=useState(0),[mys,setMys]=useState('Mầu Nhiệm Vui'),
+                  [showP,setShowP]=useState(false),[showM,setShowM]=useState(false),[showCredit,setShowCredit]=useState(false),
+                  [hist,setHist]=useState([]),[dark,setDark]=useState(true),[share,setShare]=useState(false),
+                  [total,setTotal]=useState(0),[streak,setStreak]=useState(0),[lang,setLang]=useState('vi'),[fontSize,setFontSize]=useState('medium');
+            const nextBtnRef=useRef(null), prevBtnRef=useRef(null);
            
             useEffect(()=>{
                 const saved=localStorage.getItem('rosaryData');
                 if(saved){const d=JSON.parse(saved);setHist(d.history||[]);setTotal(d.totalPrayers||0);setStreak(d.streak||0);setLang(d.language||'vi');setFontSize(d.fontSize||'medium');}
             },[]);
 
-            const t=translations[lang];
-            const M=t.mysteries;
-            const P=t.prayers;
+            const t=translations[lang], M=t.mysteries, P=t.prayers;
             const mysteryKeys={'Mầu Nhiệm Vui':'Joyful Mysteries','Mầu Nhiệm Thương':'Sorrowful Mysteries','Mầu Nhiệm Mừng':'Glorious Mysteries','Mầu Nhiệm Sáng':'Luminous Mysteries'};
             const currentMysKey=lang==='vi'?mys:mysteryKeys[mys]||'Joyful Mysteries';
             
@@ -171,8 +121,25 @@
                 ];
                 return dSteps[sInD];
             };
+
+            const createRipple=(e,btnRef)=>{
+                const button=btnRef.current;
+                if(!button)return;
+                const rect=button.getBoundingClientRect();
+                const ripple=document.createElement('span');
+                const size=Math.max(rect.width,rect.height);
+                const x=e.clientX-rect.left-size/2;
+                const y=e.clientY-rect.top-size/2;
+                ripple.style.width=ripple.style.height=`${size}px`;
+                ripple.style.left=`${x}px`;
+                ripple.style.top=`${y}px`;
+                ripple.classList.add('ripple-effect');
+                button.appendChild(ripple);
+                setTimeout(()=>ripple.remove(),600);
+            };
             
-            const next=()=>{
+            const next=(e)=>{
+                createRipple(e,nextBtnRef);
                 const cur=getStep();
                 if(cur.c===0||bc+1>=cur.c){
                     if(s<25){
@@ -187,6 +154,20 @@
                     }
                 }else{setBc(bc+1);}
             };
+
+            const prev=(e)=>{
+                createRipple(e,prevBtnRef);
+                if(bc>0){setBc(bc-1);}
+                else if(s>0){
+                    setS(s-1);
+                    const prevStep=s===1?steps[0]:s<=4?steps[s-1]:s===4?steps[3]:(()=>{
+                        const dIdx=Math.floor((s-5)/4),sInD=(s-5)%4;
+                        return [{c:0},{c:1},{c:10},{c:1}][sInD<0?3:sInD];
+                    })();
+                    setBc(prevStep.c>0?prevStep.c-1:0);
+                    if(s>=5&&s<=24&&(s-5)%4===0)setDec(Math.floor((s-5)/4));
+                }
+            };
             
             const shareText=()=>{
                 const txt=lang==='vi'?`🙏 Tôi vừa lần Mân Côi (${currentMysKey})!\n\n📊 Tổng: ${total} lần\n🔥 Chuỗi: ${streak} ngày\n\n#MânCôi`:`🙏 I just prayed the Rosary (${currentMysKey})!\n\n📊 Total: ${total} times\n🔥 Streak: ${streak} days\n\n#Rosary`;
@@ -200,11 +181,7 @@
                 const mysteryMap={'Mầu Nhiệm Vui':'Joyful Mysteries','Mầu Nhiệm Thương':'Sorrowful Mysteries','Mầu Nhiệm Mừng':'Glorious Mysteries','Mầu Nhiệm Sáng':'Luminous Mysteries','Joyful Mysteries':'Mầu Nhiệm Vui','Sorrowful Mysteries':'Mầu Nhiệm Thương','Glorious Mysteries':'Mầu Nhiệm Mừng','Luminous Mysteries':'Mầu Nhiệm Sáng'};
                 setMys(mysteryMap[mys]||mys);
                 const saved=localStorage.getItem('rosaryData');
-                if(saved){
-                    const d=JSON.parse(saved);
-                    d.language=newLang;
-                    localStorage.setItem('rosaryData',JSON.stringify(d));
-                }
+                if(saved){const d=JSON.parse(saved);d.language=newLang;localStorage.setItem('rosaryData',JSON.stringify(d));}
             };
             
             const toggleFontSize=()=>{
@@ -213,11 +190,7 @@
                 const newSize=sizes[(idx+1)%3];
                 setFontSize(newSize);
                 const saved=localStorage.getItem('rosaryData');
-                if(saved){
-                    const d=JSON.parse(saved);
-                    d.fontSize=newSize;
-                    localStorage.setItem('rosaryData',JSON.stringify(d));
-                }
+                if(saved){const d=JSON.parse(saved);d.fontSize=newSize;localStorage.setItem('rosaryData',JSON.stringify(d));}
             };
             
             const cur=getStep(),cm=M[currentMysKey],prog=(s/25)*100;
@@ -225,18 +198,14 @@
             const card=dark?'bg-white/10 border-white/20':'bg-white/80 border-gray-200';
             const txt=dark?'text-white':'text-gray-900',txt2=dark?'text-blue-200':'text-gray-600';
 
-// KẾT THÚC PHẦN 2 - Tiếp tục với Phần 3
-// PHẦN 3/3 - CUỐI CÙNG (Dán tiếp sau Phần 2)
-
-return React.createElement('div',{className:`min-h-screen ${bg} flex items-center justify-center p-4 transition-colors duration-500`},
+            return React.createElement('div',{className:`min-h-screen ${bg} flex items-center justify-center p-4 transition-colors duration-500`},
                 React.createElement('div',{className:'w-full max-w-md'},
                     React.createElement('div',{className:`${card} backdrop-blur-lg rounded-3xl shadow-2xl p-8 border transition-colors duration-500`},
                         React.createElement('div',{className:'flex justify-between items-start mb-6'},
                             React.createElement('div',{className:'flex gap-2'},
-                                React.createElement('button',{onClick:()=>setDark(!dark),className:`${dark?'bg-white/10':'bg-gray-200'} hover:opacity-80 ${txt} p-2 rounded-lg border ${dark?'border-white/20':'border-gray-300'}`},dark?'🌙':'☀️'),
-                                React.createElement('button',{onClick:toggleLang,className:`${dark?'bg-white/10':'bg-gray-200'} hover:opacity-80 ${txt} px-3 py-2 rounded-lg border ${dark?'border-white/20':'border-gray-300'} text-sm font-semibold`},lang==='vi'?'EN':'VI'),
-                                React.createElement('button',{onClick:toggleFontSize,className:`${dark?'bg-white/10':'bg-gray-200'} hover:opacity-80 ${txt} px-3 py-2 rounded-lg border ${dark?'border-white/20':'border-gray-300'} text-sm font-semibold`},fontSize==='small'?'A-':fontSize==='large'?'A+':'Aa'),
-                                React.createElement('button',{onClick:()=>notif?setNotif(false):Notification.requestPermission().then(p=>setNotif(p==='granted')),className:`${dark?'bg-white/10':'bg-gray-200'} hover:opacity-80 ${txt} p-2 rounded-lg border ${dark?'border-white/20':'border-gray-300'}`},notif?'🔔':'🔕')
+                                React.createElement('button',{onClick:()=>setDark(!dark),className:`${dark?'bg-white/10':'bg-gray-200'} hover:opacity-80 ${txt} p-2 rounded-lg border ${dark?'border-white/20':'border-gray-300'} transition-all`},dark?'🌙':'☀️'),
+                                React.createElement('button',{onClick:toggleLang,className:`${dark?'bg-white/10':'bg-gray-200'} hover:opacity-80 ${txt} px-3 py-2 rounded-lg border ${dark?'border-white/20':'border-gray-300'} text-sm font-semibold transition-all`},lang==='vi'?'EN':'VI'),
+                                React.createElement('button',{onClick:toggleFontSize,className:`${dark?'bg-white/10':'bg-gray-200'} hover:opacity-80 ${txt} px-3 py-2 rounded-lg border ${dark?'border-white/20':'border-gray-300'} text-sm font-semibold transition-all`},fontSize==='small'?'A-':fontSize==='large'?'A+':'Aa')
                             ),
                             React.createElement('div',{className:'text-right'},
                                 React.createElement('div',{className:`text-xs ${txt2}`},t.ui.total),
@@ -263,33 +232,32 @@ return React.createElement('div',{className:`min-h-screen ${bg} flex items-cente
                                 ),
                                 cur.p&&cur.p!=='mystery'&&React.createElement('div',{className:`${dark?'bg-white/5 border-white/10':'bg-white border-gray-200'} rounded-xl p-4 border`},
                                     React.createElement('p',{className:`${dark?'text-white/80':'text-gray-700'} leading-relaxed text-center prayer-text text-size-`+fontSize,style:{whiteSpace:'pre-line'}},
-                                        cur.p===Object.keys(P)[3]&&s>=4&&s<24&&(s-4)%4===3
-                                            ? P[cur.p]+'\n\n'+Object.keys(P)[5]+':\n'+P[Object.keys(P)[5]]
-                                            : P[cur.p]
+                                        cur.p===Object.keys(P)[3]&&s>=4&&s<24&&(s-4)%4===3?P[cur.p]+'\n\n'+Object.keys(P)[5]+':\n'+P[Object.keys(P)[5]]:P[cur.p]
                                     )
                                 )
                             ),
-                            React.createElement('button',{onClick:next,className:`w-full bg-gradient-to-r ${cm.color} text-white font-medium py-4 rounded-xl shadow-md`},s===25?t.ui.complete:t.ui.next),
+                            React.createElement('div',{className:'grid grid-cols-2 gap-3'},
+                                React.createElement('button',{ref:prevBtnRef,onClick:prev,disabled:s===0&&bc===0,className:`btn-action ${s===0&&bc===0?'opacity-40 cursor-not-allowed':''}  bg-gradient-to-r from-indigo-500 to-purple-500 text-white font-medium py-4 rounded-xl shadow-md`},t.ui.prev),
+                                React.createElement('button',{ref:nextBtnRef,onClick:next,className:`btn-action bg-gradient-to-r ${cm.color} text-white font-medium py-4 rounded-xl shadow-md`},s===25?t.ui.complete:t.ui.next)
+                            ),
                             s>=4&&s<24&&React.createElement('div',{className:'flex items-center justify-center gap-2 mt-3'},
-                                React.createElement('div',{className:'flex gap-1'},
-                                    [0,1,2,3,4].map(i=>React.createElement('div',{key:i,className:`w-3 h-3 rounded-full transition-all ${i<dec?`bg-gradient-to-br ${cm.color} shadow-lg`:dark?'bg-white/20':'bg-gray-300'}`}))
-                                ),
+                                React.createElement('div',{className:'flex gap-1'},[0,1,2,3,4].map(i=>React.createElement('div',{key:i,className:`w-3 h-3 rounded-full transition-all ${i<dec?`bg-gradient-to-br ${cm.color} shadow-lg`:dark?'bg-white/20':'bg-gray-300'}`}))),
                                 React.createElement('span',{className:`text-xs ${dark?'text-white/80':'text-gray-600'}`},`${t.ui.decade} ${dec}/5`)
                             )
                         ),
                         React.createElement('div',{className:'space-y-3 mb-6'},
                             React.createElement('div',{className:'grid grid-cols-3 gap-3'},
-                                React.createElement('button',{onClick:()=>setShowP(!showP),className:`${dark?'bg-white/10 border-white/20':'bg-gray-200 border-gray-300'} hover:opacity-80 ${txt} font-semibold py-3 rounded-xl border text-sm`},'📖 '+t.ui.prayers),
-                                React.createElement('button',{onClick:()=>setShowCredit(true),className:`${dark?'bg-white/10 border-white/20':'bg-gray-200 border-gray-300'} hover:opacity-80 ${txt} font-semibold py-3 rounded-xl border text-sm`},'ℹ️'),
-                                React.createElement('button',{onClick:shareText,className:`${dark?'bg-white/10 border-white/20':'bg-gray-200 border-gray-300'} hover:opacity-80 ${txt} font-semibold py-3 rounded-xl border text-sm`},'📤 '+t.ui.share)
+                                React.createElement('button',{onClick:()=>setShowP(!showP),className:`${dark?'bg-white/10 border-white/20':'bg-gray-200 border-gray-300'} hover:opacity-80 ${txt} font-semibold py-3 rounded-xl border text-sm transition-all`},'📖 '+t.ui.prayers),
+                                React.createElement('button',{onClick:()=>setShowCredit(true),className:`${dark?'bg-white/10 border-white/20':'bg-gray-200 border-gray-300'} hover:opacity-80 ${txt} font-semibold py-3 rounded-xl border text-sm transition-all`},'ℹ️'),
+                                React.createElement('button',{onClick:shareText,className:`${dark?'bg-white/10 border-white/20':'bg-gray-200 border-gray-300'} hover:opacity-80 ${txt} font-semibold py-3 rounded-xl border text-sm transition-all`},'📤 '+t.ui.share)
                             )
                         ),
                         React.createElement('div',{className:`${dark?'bg-white/5 border-white/10':'bg-gray-50 border-gray-200'} rounded-xl p-4 border mb-4`},
                             React.createElement('label',{className:`${dark?'text-white/70':'text-gray-600'} text-xs mb-2 block`},t.ui.selectMystery),
-                            React.createElement('select',{value:currentMysKey,onChange:e=>{setMys(e.target.value);},className:`w-full ${dark?'bg-white/10 border-white/20':'bg-white border-gray-300'} ${txt} border rounded-lg px-3 py-2 text-sm focus:outline-none`},
+                            React.createElement('select',{value:currentMysKey,onChange:e=>setMys(e.target.value),className:`w-full ${dark?'bg-white/10 border-white/20':'bg-white border-gray-300'} ${txt} border rounded-lg px-3 py-2 text-sm focus:outline-none transition-all`},
                                 Object.keys(M).map(m=>React.createElement('option',{key:m,value:m},`${m} - ${M[m].days}`))
                             ),
-                            React.createElement('button',{onClick:()=>setShowM(true),className:`w-full mt-2 ${dark?'bg-white/5':'bg-gray-100'} ${txt} text-xs py-2 rounded-lg hover:opacity-80`},`📖 ${t.ui.view5Mysteries} ${lang==='vi'?currentMysKey.replace('Mầu Nhiệm ',''):currentMysKey.replace(' Mysteries','')}`)
+                            React.createElement('button',{onClick:()=>setShowM(true),className:`w-full mt-2 ${dark?'bg-white/5':'bg-gray-100'} ${txt} text-xs py-2 rounded-lg hover:opacity-80 transition-all`},`📖 ${t.ui.view5Mysteries} ${lang==='vi'?currentMysKey.replace('Mầu Nhiệm ',''):currentMysKey.replace(' Mysteries','')}`)
                         ),
                         hist.length>0&&React.createElement('div',{className:`${dark?'bg-white/5 border-white/10':'bg-gray-50 border-gray-200'} rounded-xl p-4 border mb-4`},
                             React.createElement('h3',{className:`${dark?'text-white/70':'text-gray-600'} text-xs mb-2`},t.ui.history),
@@ -340,9 +308,9 @@ return React.createElement('div',{className:`min-h-screen ${bg} flex items-cente
                         ),
                         React.createElement('div',{className:`${dark?'bg-white/10 border-white/20':'bg-gray-50 border-gray-200'} rounded-xl p-6 border text-center`},
                             React.createElement('div',{className:'text-6xl mb-4'},'❤️'),
-                            React.createElement('h3',{className:`text-xl font-semibold ${txt} mb-3`},lang==='vi'?'Cám ơn mọi người':'Thank You'),
+                            React.createElement('h3',{className:`text-xl font-semibold ${txt} mb-3`},lang==='vi'?'Cảm ơn mọi người':'Thank You'),
                             React.createElement('p',{className:`${dark?'text-white/80':'text-gray-700'} text-sm leading-relaxed mb-4`},lang==='vi'?'Cảm ơn bạn đã sử dụng ứng dụng Mân Côi. Xin Đức Mẹ Maria luôn phù hộ và ban phước lành cho bạn và gia đình.':'Thank you for using the Holy Rosary app. May the Blessed Virgin Mary always protect and bless you and your family.'),
-                            React.createElement('div',{className:`${dark?'text-blue-300':'text-blue-600'} text-xs mt-4 pt-4 border-t ${dark?'border-white/20':'border-gray-200'}`},'Version 2.6 • Developer: Hứa Hoàng Thiện')
+                            React.createElement('div',{className:`${dark?'text-blue-300':'text-blue-600'} text-xs mt-4 pt-4 border-t ${dark?'border-white/20':'border-gray-200'}`},'Version 2.8 • Developer: Hứa Hoàng Thiện')
                         )
                     )
                 ),
