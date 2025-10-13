@@ -86,9 +86,8 @@
             en: { mysteries: mysteriesData.en, prayers: prayersData.en, ui: uiTexts.en }
         };
 
-        // ✅ HÀM TỰ ĐỘNG CHỌN MẦU NHIỆM THEO NGÀY
         function getDefaultMystery(language='vi'){
-            const day=new Date().getDay(); // 0=CN, 1=T2, 2=T3, 3=T4, 4=T5, 5=T6, 6=T7
+            const day=new Date().getDay();
             const mysteryByDay={
                 vi:{0:'Mầu Nhiệm Mừng',1:'Mầu Nhiệm Vui',2:'Mầu Nhiệm Thương',3:'Mầu Nhiệm Mừng',4:'Mầu Nhiệm Sáng',5:'Mầu Nhiệm Thương',6:'Mầu Nhiệm Vui'},
                 en:{0:'Glorious Mysteries',1:'Joyful Mysteries',2:'Sorrowful Mysteries',3:'Glorious Mysteries',4:'Luminous Mysteries',5:'Sorrowful Mysteries',6:'Joyful Mysteries'}
@@ -97,15 +96,22 @@
         }
 
         function App(){
-            // ✅ SỬA LỖI 1: Bỏ khoảng trắng trong tên biến 'showCredit,setShowCredit'
-            // ✅ SỬA LỖI 2: Bỏ khoảng trắng trong tên biến 'fontSize,setFontSize'
-            // ✅ SỬA LỖI 3: Bỏ khoảng trắng đầu trong giá trị 'Mầu Nhiệm Vui'
-            // ✅ SỬA LỖI 4: Thêm tự động chọn mầu nhiệm theo ngày
-            const [s,setS]=useState(0),[bc,setBc]=useState(0),[dec,setDec]=useState(0),[mys,setMys]=useState(getDefaultMystery('vi')),
-                  [showP,setShowP]=useState(false),[showM,setShowM]=useState(false),[showCredit,setShowCredit]=useState(false),
-                  [hist,setHist]=useState([]),[dark,setDark]=useState(true),[share,setShare]=useState(false),
-                  [total,setTotal]=useState(0),[streak,setStreak]=useState(0),[lang,setLang]=useState('vi'),[fontSize,setFontSize]=useState('medium');
-            const nextBtnRef=useRef(null), prevBtnRef=useRef(null);
+            const [s,setS]=useState(0);
+            const [bc,setBc]=useState(0);
+            const [dec,setDec]=useState(0);
+            const [mys,setMys]=useState(getDefaultMystery('vi'));
+            const [showP,setShowP]=useState(false);
+            const [showM,setShowM]=useState(false);
+            const [showCredit,setShowCredit]=useState(false);
+            const [hist,setHist]=useState([]);
+            const [dark,setDark]=useState(true);
+            const [share,setShare]=useState(false);
+            const [total,setTotal]=useState(0);
+            const [streak,setStreak]=useState(0);
+            const [lang,setLang]=useState('vi');
+            const [fontSize,setFontSize]=useState('medium');
+            const nextBtnRef=useRef(null);
+            const prevBtnRef=useRef(null);
            
             useEffect(()=>{
                 try{
@@ -118,7 +124,6 @@
                         const savedLang=d.language||'vi';
                         setLang(savedLang);
                         setFontSize(d.fontSize||'medium');
-                        // ✅ Tự động cập nhật mầu nhiệm theo ngày hiện tại
                         const todayMystery=getDefaultMystery(savedLang);
                         setMys(todayMystery);
                     }
@@ -207,7 +212,6 @@
             const toggleLang=()=>{
                 const newLang=lang==='vi'?'en':'vi';
                 setLang(newLang);
-                // ✅ Chuyển đổi mầu nhiệm sang ngôn ngữ tương ứng
                 const newMystery=mysteryKeys[mys]||getDefaultMystery(newLang);
                 setMys(newMystery);
                 try{
@@ -227,13 +231,11 @@
                 }catch(e){console.error('Error saving font size:',e);}
             };
             
-            // ✅ HÀM TỰ ĐỘNG CHỌN MẦU NHIỆM HÔM NAY
             const setTodayMystery=()=>{
                 const todayMystery=getDefaultMystery(lang);
                 setMys(todayMystery);
             };
             
-            // ✅ LẤY TÊN NGÀY HIỆN TẠI
             const getDayName=()=>{
                 const days={vi:['Chủ Nhật','Thứ 2','Thứ 3','Thứ 4','Thứ 5','Thứ 6','Thứ 7'],en:['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday']};
                 return days[lang][new Date().getDay()];
