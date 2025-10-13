@@ -50,7 +50,7 @@
         const mysteriesData = {
             vi: {
                 'Mầu Nhiệm Vui':{days:'Thứ 2, Thứ 7',color:'from-yellow-400 to-orange-500',items:['Thiên thần truyền tin cho Đức Bà chịu thai. Ta hãy xin cho được ở khiêm nhường.','Đức Bà đi viếng Bà Thánh Isave. Ta hãy xin cho được lòng yêu người.','Đức Bà sinh Đức Chúa Giêsu trong hang đá. Ta hãy xin cho được lòng khó khăn.','Đức Bà dâng Đức Chúa Giêsu trong đền Thánh. Ta hãy xin cho được vâng lời chịu lụy.','Đức Bà tìm được Đức Chúa Giêsu trong Đền thánh. Ta hãy xin cho được giữ nghĩa cùng Chúa luôn.']},
-                'Mầu Nhiệm Thương':{days:'Thứ 3, Thứ 6',color:'from-red-400 to-rose-500',items:['Đức Chúa Giêsu lo buồn đổ mổ hôi máu. Ta hãy xin cho được ăn năn tội nên.','Đức Chúa Giêsu chịu đánh đòn. Ta hãy xin cho được hãm mình chịu khó bằng lòng.','Đức Chúa Giêsu chịu đội mão gai. Ta hãy xin cho được chịu mọi sự sỉ nhục bằng lòng.','Đức Chúa Giêsu vác Thánh Giá. Ta hãy xin cho được vác Thánh Giá theo chân Chúa.','Đức Chúa Giêsu chịu chết trên cây Thánh Giá. Ta hãy xin đóng đanh tính xác thịt vào Thánh Giá Chúa.']},
+                'Mầu Nhiệm Thương':{days:'Thứ 3, Thứ 6',color:'from-red-400 to-rose-500',items:['Đức Chúa Giêsu lo buồn đổ mồ hôi máu. Ta hãy xin cho được ăn năn tội nên.','Đức Chúa Giêsu chịu đánh đòn. Ta hãy xin cho được hãm mình chịu khó bằng lòng.','Đức Chúa Giêsu chịu đội mão gai. Ta hãy xin cho được chịu mọi sự sỉ nhục bằng lòng.','Đức Chúa Giêsu vác Thánh Giá. Ta hãy xin cho được vác Thánh Giá theo chân Chúa.','Đức Chúa Giêsu chịu chết trên cây Thánh Giá. Ta hãy xin đóng đanh tính xác thịt vào Thánh Giá Chúa.']},
                 'Mầu Nhiệm Mừng':{days:'Thứ 4, Chủ Nhật',color:'from-amber-400 to-yellow-500',items:['Đức Chúa Giêsu sống lại. Ta hãy xin cho được sống lại thật về phần linh hồn.','Đức Chúa Giêsu lên trời. Ta hãy xin cho được ái mộ những sự trên trời.','Đức Chúa Thánh Thần hiện xuống. Ta hãy xin cho được lòng đầy dẫy mọi ơn Đức Chúa Thánh Thần.','Đức Chúa Trời cho Đức Bà lên trời. Ta hãy xin ơn chết lành trong tay Đức Mẹ.','Đức Chúa Trời thưởng Đức Mẹ trên trời. Ta hãy xin Đức Mẹ phù hộ cho ta được thưởng cùng Đức Mẹ trên nước thiên đàng.']},
                 'Mầu Nhiệm Sáng':{days:'Thứ 5',color:'from-blue-400 to-cyan-500',items:['Đức Chúa Giêsu chịu phép Rửa tại sông Giodan. Ta hãy xin cho được sống xứng đáng là con cái Chúa.','Đức Chúa Giêsu dự tiệc cưới Cana. Ta hãy xin cho được vững tin vào quyền năng của Ngài.','Đức Chúa Giêsu rao giảng Nước Trời. Ta hãy xin cho được hoán cải và đón nhận Tin Mừng.','Đức Chúa Giêsu biến hình trên núi. Ta hãy xin cho được lắng nghe và thực hành lời Chúa.','Đức Chúa Giêsu lập bí tích Thánh Thể. Ta hãy xin cho được năng kết hiệp cùng Chúa Giêsu Thánh Thể.']}
             },
@@ -86,52 +86,65 @@
             en: { mysteries: mysteriesData.en, prayers: prayersData.en, ui: uiTexts.en }
         };
 
-        function getDefaultMystery(language='vi'){
-            const day=new Date().getDay();
-            const mysteryByDay={
-                vi:{0:'Mầu Nhiệm Mừng',1:'Mầu Nhiệm Vui',2:'Mầu Nhiệm Thương',3:'Mầu Nhiệm Mừng',4:'Mầu Nhiệm Sáng',5:'Mầu Nhiệm Thương',6:'Mầu Nhiệm Vui'},
-                en:{0:'Glorious Mysteries',1:'Joyful Mysteries',2:'Sorrowful Mysteries',3:'Glorious Mysteries',4:'Luminous Mysteries',5:'Sorrowful Mysteries',6:'Joyful Mysteries'}
+        // ⭐ HÀM TỰ ĐỘNG CHỌN MẦU NHIỆM THEO NGÀY - PHẢI ĐẶT TRƯỚC function App()
+        const getTodayMystery = (language = 'vi') => {
+            const day = new Date().getDay(); // 0=Chủ Nhật, 1=Thứ 2, ..., 6=Thứ 7
+            const mysteryMap = {
+                vi: {
+                    0: 'Mầu Nhiệm Mừng',    // Chủ Nhật
+                    1: 'Mầu Nhiệm Vui',     // Thứ 2
+                    2: 'Mầu Nhiệm Thương',  // Thứ 3
+                    3: 'Mầu Nhiệm Mừng',    // Thứ 4
+                    4: 'Mầu Nhiệm Sáng',    // Thứ 5
+                    5: 'Mầu Nhiệm Thương',  // Thứ 6
+                    6: 'Mầu Nhiệm Vui'      // Thứ 7
+                },
+                en: {
+                    0: 'Glorious Mysteries',
+                    1: 'Joyful Mysteries',
+                    2: 'Sorrowful Mysteries',
+                    3: 'Glorious Mysteries',
+                    4: 'Luminous Mysteries',
+                    5: 'Sorrowful Mysteries',
+                    6: 'Joyful Mysteries'
+                }
             };
-            return mysteryByDay[language][day];
-        }
+            const result = mysteryMap[language][day];
+            console.log(`🔍 getTodayMystery: day=${day}, lang=${language}, result=${result}`);
+            return result;
+        };
 
         function App(){
-            const [s,setS]=useState(0);
-            const [bc,setBc]=useState(0);
-            const [dec,setDec]=useState(0);
-            const [mys,setMys]=useState(getDefaultMystery('vi'));
-            const [showP,setShowP]=useState(false);
-            const [showM,setShowM]=useState(false);
-            const [showCredit,setShowCredit]=useState(false);
-            const [hist,setHist]=useState([]);
-            const [dark,setDark]=useState(true);
-            const [share,setShare]=useState(false);
-            const [total,setTotal]=useState(0);
-            const [streak,setStreak]=useState(0);
-            const [lang,setLang]=useState('vi');
-            const [fontSize,setFontSize]=useState('medium');
-            const nextBtnRef=useRef(null);
-            const prevBtnRef=useRef(null);
+            const [s,setS]=useState(0),[bc,setBc]=useState(0),[dec,setDec]=useState(0),
+                  [showP,setShowP]=useState(false),[showM,setShowM]=useState(false),[showCredit,setShowCredit]=useState(false),
+                  [hist,setHist]=useState([]),[dark,setDark]=useState(true),[share,setShare]=useState(false),
+                  [total,setTotal]=useState(0),[streak,setStreak]=useState(0),[lang,setLang]=useState('vi'),[fontSize,setFontSize]=useState('medium');
+            
+            // ⭐ KHỞI TẠO MẦU NHIỆM - Lấy từ localStorage hoặc mặc định theo ngày
+            const [mys,setMys]=useState(()=>{
+                const saved=localStorage.getItem('rosaryData');
+                const savedLang = saved ? JSON.parse(saved).language || 'vi' : 'vi';
+                const todayMystery = getTodayMystery(savedLang);
+                console.log(`✅ Initial mystery: ${todayMystery}`);
+                return todayMystery;
+            });
+            
+            const nextBtnRef=useRef(null), prevBtnRef=useRef(null);
            
             useEffect(()=>{
-                try{
-                    const saved=localStorage.getItem('rosaryData');
-                    if(saved){
-                        const d=JSON.parse(saved);
-                        setHist(d.history||[]);
-                        setTotal(d.totalPrayers||0);
-                        setStreak(d.streak||0);
-                        const savedLang=d.language||'vi';
-                        setLang(savedLang);
-                        setFontSize(d.fontSize||'medium');
-                        const todayMystery=getDefaultMystery(savedLang);
-                        setMys(todayMystery);
-                    }
-                }catch(e){console.error('Error loading data:',e);}
+                const saved=localStorage.getItem('rosaryData');
+                if(saved){
+                    const d=JSON.parse(saved);
+                    setHist(d.history||[]);
+                    setTotal(d.totalPrayers||0);
+                    setStreak(d.streak||0);
+                    setLang(d.language||'vi');
+                    setFontSize(d.fontSize||'medium');
+                }
             },[]);
 
             const t=translations[lang], M=t.mysteries, P=t.prayers;
-            const mysteryKeys={'Mầu Nhiệm Vui':'Joyful Mysteries','Mầu Nhiệm Thương':'Sorrowful Mysteries','Mầu Nhiệm Mừng':'Glorious Mysteries','Mầu Nhiệm Sáng':'Luminous Mysteries','Joyful Mysteries':'Mầu Nhiệm Vui','Sorrowful Mysteries':'Mầu Nhiệm Thương','Glorious Mysteries':'Mầu Nhiệm Mừng','Luminous Mysteries':'Mầu Nhiệm Sáng'};
+            const mysteryKeys={'Mầu Nhiệm Vui':'Joyful Mysteries','Mầu Nhiệm Thương':'Sorrowful Mysteries','Mầu Nhiệm Mừng':'Glorious Mysteries','Mầu Nhiệm Sáng':'Luminous Mysteries'};
             const currentMysKey=lang==='vi'?mys:mysteryKeys[mys]||'Joyful Mysteries';
             
             const steps=[
@@ -178,12 +191,10 @@
                         setS(s+1);setBc(0);
                         if(s>=4&&s<24&&(s-4)%4===3)setDec(Math.floor((s-4)/4)+1);
                     }else{
-                        try{
-                            const sess={mystery:currentMysKey,date:new Date().toLocaleString(lang==='vi'?'vi-VN':'en-US'),completed:true};
-                            const newH=[sess,...hist.slice(0,9)],newT=total+1,newS=streak+1;
-                            setHist(newH);setTotal(newT);setStreak(newS);
-                            localStorage.setItem('rosaryData',JSON.stringify({history:newH,totalPrayers:newT,streak:newS,language:lang,fontSize:fontSize}));
-                        }catch(e){console.error('Error saving data:',e);}
+                        const sess={mystery:currentMysKey,date:new Date().toLocaleString(lang==='vi'?'vi-VN':'en-US'),completed:true};
+                        const newH=[sess,...hist.slice(0,9)],newT=total+1,newS=streak+1;
+                        setHist(newH);setTotal(newT);setStreak(newS);
+                        localStorage.setItem('rosaryData',JSON.stringify({history:newH,totalPrayers:newT,streak:newS,language:lang,fontSize:fontSize}));
                         setS(0);setBc(0);setDec(0);
                     }
                 }else{setBc(bc+1);}
@@ -212,12 +223,10 @@
             const toggleLang=()=>{
                 const newLang=lang==='vi'?'en':'vi';
                 setLang(newLang);
-                const newMystery=mysteryKeys[mys]||getDefaultMystery(newLang);
-                setMys(newMystery);
-                try{
-                    const saved=localStorage.getItem('rosaryData');
-                    if(saved){const d=JSON.parse(saved);d.language=newLang;localStorage.setItem('rosaryData',JSON.stringify(d));}
-                }catch(e){console.error('Error saving language:',e);}
+                const mysteryMap={'Mầu Nhiệm Vui':'Joyful Mysteries','Mầu Nhiệm Thương':'Sorrowful Mysteries','Mầu Nhiệm Mừng':'Glorious Mysteries','Mầu Nhiệm Sáng':'Luminous Mysteries','Joyful Mysteries':'Mầu Nhiệm Vui','Sorrowful Mysteries':'Mầu Nhiệm Thương','Glorious Mysteries':'Mầu Nhiệm Mừng','Luminous Mysteries':'Mầu Nhiệm Sáng'};
+                setMys(mysteryMap[mys]||getTodayMystery(newLang));
+                const saved=localStorage.getItem('rosaryData');
+                if(saved){const d=JSON.parse(saved);d.language=newLang;localStorage.setItem('rosaryData',JSON.stringify(d));}
             };
             
             const toggleFontSize=()=>{
@@ -225,20 +234,8 @@
                 const idx=sizes.indexOf(fontSize);
                 const newSize=sizes[(idx+1)%3];
                 setFontSize(newSize);
-                try{
-                    const saved=localStorage.getItem('rosaryData');
-                    if(saved){const d=JSON.parse(saved);d.fontSize=newSize;localStorage.setItem('rosaryData',JSON.stringify(d));}
-                }catch(e){console.error('Error saving font size:',e);}
-            };
-            
-            const setTodayMystery=()=>{
-                const todayMystery=getDefaultMystery(lang);
-                setMys(todayMystery);
-            };
-            
-            const getDayName=()=>{
-                const days={vi:['Chủ Nhật','Thứ 2','Thứ 3','Thứ 4','Thứ 5','Thứ 6','Thứ 7'],en:['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday']};
-                return days[lang][new Date().getDay()];
+                const saved=localStorage.getItem('rosaryData');
+                if(saved){const d=JSON.parse(saved);d.fontSize=newSize;localStorage.setItem('rosaryData',JSON.stringify(d));}
             };
             
             const cur=getStep(),cm=M[currentMysKey],prog=(s/25)*100;
@@ -297,17 +294,11 @@
                             React.createElement('div',{className:'grid grid-cols-3 gap-3'},
                                 React.createElement('button',{onClick:()=>setShowP(!showP),className:`${dark?'bg-white/10 border-white/20':'bg-gray-200 border-gray-300'} hover:opacity-80 ${txt} font-semibold py-3 rounded-xl border text-sm transition-all`},'📖 '+t.ui.prayers),
                                 React.createElement('button',{onClick:()=>setShowCredit(true),className:`${dark?'bg-white/10 border-white/20':'bg-gray-200 border-gray-300'} hover:opacity-80 ${txt} font-semibold py-3 rounded-xl border text-sm transition-all`},'ℹ️'),
-                                React.createElement('button',{onClick:shareText,className:`${dark?'bg-white/10 border-white/20':'bg-gray-200 border-gray-300'} hover:opacity-80 ${txt} font-semibold py-3 rounded-xl border text-sm transition-all`},'🔤 '+t.ui.share)
+                                React.createElement('button',{onClick:shareText,className:`${dark?'bg-white/10 border-white/20':'bg-gray-200 border-gray-300'} hover:opacity-80 ${txt} font-semibold py-3 rounded-xl border text-sm transition-all`},'📤 '+t.ui.share)
                             )
                         ),
                         React.createElement('div',{className:`${dark?'bg-white/5 border-white/10':'bg-gray-50 border-gray-200'} rounded-xl p-4 border mb-4`},
-                            React.createElement('div',{className:'flex justify-between items-center mb-2'},
-                                React.createElement('label',{className:`${dark?'text-white/70':'text-gray-600'} text-xs`},t.ui.selectMystery),
-                                React.createElement('div',{className:'flex items-center gap-2'},
-                                    React.createElement('span',{className:`${dark?'text-blue-300':'text-blue-600'} text-xs font-semibold`},getDayName()),
-                                    React.createElement('button',{onClick:setTodayMystery,className:`${dark?'bg-gradient-to-r from-blue-500 to-purple-500':'bg-blue-500'} text-white text-xs px-3 py-1 rounded-lg hover:opacity-80 transition-all font-semibold`},lang==='vi'?'Hôm nay':'Today')
-                                )
-                            ),
+                            React.createElement('label',{className:`${dark?'text-white/70':'text-gray-600'} text-xs mb-2 block`},t.ui.selectMystery),
                             React.createElement('select',{value:currentMysKey,onChange:e=>setMys(e.target.value),className:`w-full ${dark?'bg-white/10 border-white/20':'bg-white border-gray-300'} ${txt} border rounded-lg px-3 py-2 text-sm focus:outline-none transition-all`},
                                 Object.keys(M).map(m=>React.createElement('option',{key:m,value:m},`${m} - ${M[m].days}`))
                             ),
@@ -364,7 +355,7 @@
                             React.createElement('div',{className:'text-6xl mb-4'},'❤️'),
                             React.createElement('h3',{className:`text-xl font-semibold ${txt} mb-3`},lang==='vi'?'Cảm ơn mọi người':'Thank You'),
                             React.createElement('p',{className:`${dark?'text-white/80':'text-gray-700'} text-sm leading-relaxed mb-4`},lang==='vi'?'Cảm ơn bạn đã sử dụng ứng dụng Mân Côi. Xin Đức Mẹ Maria luôn phù hộ và ban phước lành cho bạn và gia đình.':'Thank you for using the Holy Rosary app. May the Blessed Virgin Mary always protect and bless you and your family.'),
-                            React.createElement('div',{className:`${dark?'text-blue-300':'text-blue-600'} text-xs mt-4 pt-4 border-t ${dark?'border-white/20':'border-gray-200'}`},'Version 2.8 • Developer: Hứa Hoàng Thiện')
+                            React.createElement('div',{className:`${dark?'text-blue-300':'text-blue-600'} text-xs mt-4 pt-4 border-t ${dark?'border-white/20':'border-gray-200'}`},'Version 3.0 • Developer: Hứa Hoàng Thiện')
                         )
                     )
                 ),
