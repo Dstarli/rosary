@@ -1,14 +1,49 @@
 {
   "name": "Ứng Dụng Lần Hạt Mân Côi",
   "short_name": "Mân Côi",
-  "description": "Ứng dụng hỗ trợ cầu nguyện Mân Côi",
-  "start_url": "/",
+  "description": "Ứng dụng hỗ trợ cầu nguyện Mân Côi theo truyền thống Công Giáo",
+  "start_url": "./",
+  "scope": "./",
   "display": "standalone",
   "background_color": "#1e3a8a",
   "theme_color": "#1e3a8a",
   "orientation": "portrait",
+  "categories": ["lifestyle", "religion"],
+  "lang": "vi-VN",
+  "dir": "ltr",
   "icons": [
-    {"src": "icon-192.png", "sizes": "192x192", "type": "image/png"},
-    {"src": "icon-512.png", "sizes": "512x512", "type": "image/png"}
+    {
+      "src": "./icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "./icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "./icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Bắt đầu cầu nguyện",
+      "short_name": "Cầu nguyện",
+      "description": "Bắt đầu lần Mân Côi ngay",
+      "url": "./",
+      "icons": [
+        {
+          "src": "./icon-192.png",
+          "sizes": "192x192"
+        }
+      ]
+    }
   ]
 }
