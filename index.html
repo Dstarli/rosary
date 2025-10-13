@@ -19,9 +19,11 @@
         @keyframes fadeSlideIn{from{opacity:0;transform:translateX(20px)}to{opacity:1;transform:translateX(0)}}
         @keyframes buttonPress{0%{transform:scale(1)}50%{transform:scale(0.95)}100%{transform:scale(1)}}
         @keyframes ripple{0%{transform:scale(0);opacity:1}100%{transform:scale(4);opacity:0}}
+        @keyframes fadeIn{from{opacity:0;transform:translateY(-10px)}to{opacity:1;transform:translateY(0)}}
         .animate-pulse{animation:pulse 2s cubic-bezier(.4,0,.6,1) infinite}
         .animate-bounce{animation:bounce 1s infinite}
         .fade-slide{animation:fadeSlideIn 0.4s ease-out}
+        .fade-in{animation:fadeIn 0.5s ease-out}
         .button-press{animation:buttonPress 0.3s ease-out}
         .text-size-small{font-size:13pt;line-height:1.5}
         .text-size-medium{font-size:14pt;line-height:1.6}
@@ -37,6 +39,7 @@
         .btn-action:active{transform:scale(0.95)}
         .btn-action:hover{transform:translateY(-2px);box-shadow:0 10px 20px rgba(0,0,0,0.2)}
         .ripple-effect{position:absolute;border-radius:50%;background:rgba(255,255,255,0.5);pointer-events:none;animation:ripple 0.6s ease-out}
+        .date-banner{background:linear-gradient(135deg,rgba(255,255,255,0.15),rgba(255,255,255,0.05));backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,0.2)}
     </style>
 </head>
 <body>
@@ -47,9 +50,14 @@
     <script type="text/babel">
         const {useState,useEffect,useRef}=React;
         
+        if (typeof prayersData === 'undefined') {
+            console.error('❌ CRITICAL ERROR: prayersData not loaded from prayers.js!');
+            document.getElementById('root').innerHTML = '<div style="padding:20px;color:red;font-family:sans-serif;"><h1>Error Loading App</h1><p>prayers.js failed to load. Please check the file exists and is accessible.</p></div>';
+        }
+        
         const mysteriesData = {
             vi: {
-                'Mầu Nhiệm Vui':{days:'Thứ 2, Thứ 7',color:'from-yellow-400 to-orange-500',items:['Thiên thần truyền tin cho Đức Bà chịu thai. Ta hãy xin cho được ở khiêm nhường.','Đức Bà đi viếng Bà Thánh Isave. Ta hãy xin cho được lòng yêu người.','Đức Bà sinh Đức Chúa Giêsu trong hang đá. Ta hãy xin cho được lòng khó khăn.','Đức Bà dâng Đức Chúa Giêsu trong đền Thánh. Ta hãy xin cho được vâng lời chịu lụy.','Đức Bà tìm được Đức Chúa Giêsu trong Đền thánh. Ta hãy xin cho được giữ nghĩa cùng Chúa luôn.']},
+                'Mầu Nhiệm Vui':{days:'Thứ 2, Thứ 7',color:'from-yellow-400 to-orange-500',items:['Thiên thần truyền tin cho Đức Bà chịu thai. Ta hãy xin cho được ở khiêm nhường.','Đức Bà đi viếng Bà Thánh Isave. Ta hãy xin cho được lòng yêu người.','Đức Bà sinh Đức Chúa Giêsu trong hang đá. Ta hãy xin cho được lòng khó khăn.','Đức Bà dâng Đức Chúa Giêsu trong đền Thánh. Ta hãy xin cho được vâng lời chịu lụy.','Đức Bà tìm được Đức Chúa Giêsu trong Đền thành. Ta hãy xin cho được giữ nghĩa cùng Chúa luôn.']},
                 'Mầu Nhiệm Thương':{days:'Thứ 3, Thứ 6',color:'from-red-400 to-rose-500',items:['Đức Chúa Giêsu lo buồn đổ mồ hôi máu. Ta hãy xin cho được ăn năn tội nên.','Đức Chúa Giêsu chịu đánh đòn. Ta hãy xin cho được hãm mình chịu khó bằng lòng.','Đức Chúa Giêsu chịu đội mão gai. Ta hãy xin cho được chịu mọi sự sỉ nhục bằng lòng.','Đức Chúa Giêsu vác Thánh Giá. Ta hãy xin cho được vác Thánh Giá theo chân Chúa.','Đức Chúa Giêsu chịu chết trên cây Thánh Giá. Ta hãy xin đóng đanh tính xác thịt vào Thánh Giá Chúa.']},
                 'Mầu Nhiệm Mừng':{days:'Thứ 4, Chủ Nhật',color:'from-amber-400 to-yellow-500',items:['Đức Chúa Giêsu sống lại. Ta hãy xin cho được sống lại thật về phần linh hồn.','Đức Chúa Giêsu lên trời. Ta hãy xin cho được ái mộ những sự trên trời.','Đức Chúa Thánh Thần hiện xuống. Ta hãy xin cho được lòng đầy dẫy mọi ơn Đức Chúa Thánh Thần.','Đức Chúa Trời cho Đức Bà lên trời. Ta hãy xin ơn chết lành trong tay Đức Mẹ.','Đức Chúa Trời thưởng Đức Mẹ trên trời. Ta hãy xin Đức Mẹ phù hộ cho ta được thưởng cùng Đức Mẹ trên nước thiên đàng.']},
                 'Mầu Nhiệm Sáng':{days:'Thứ 5',color:'from-blue-400 to-cyan-500',items:['Đức Chúa Giêsu chịu phép Rửa tại sông Giodan. Ta hãy xin cho được sống xứng đáng là con cái Chúa.','Đức Chúa Giêsu dự tiệc cưới Cana. Ta hãy xin cho được vững tin vào quyền năng của Ngài.','Đức Chúa Giêsu rao giảng Nước Trời. Ta hãy xin cho được hoán cải và đón nhận Tin Mừng.','Đức Chúa Giêsu biến hình trên núi. Ta hãy xin cho được lắng nghe và thực hành lời Chúa.','Đức Chúa Giêsu lập bí tích Thánh Thể. Ta hãy xin cho được năng kết hiệp cùng Chúa Giêsu Thánh Thể.']}
@@ -69,7 +77,8 @@
                 share:'Chia sẻ', selectMystery:'Chọn Mầu Nhiệm:', view5Mysteries:'Xem 5 Sự',
                 history:'Lịch Sử:', quote:'"Lạy Mẹ Maria, xin cầu cho chúng con"', prayersTitle:'Các Kinh Nguyện',
                 decade:'Thập', copied:'Đã sao chép!', mysteryPrefix:'Mầu Nhiệm Thứ',
-                signCross:'Làm Dấu Thánh Giá và đọc', read:'Đọc', and:'và'
+                signCross:'Làm Dấu Thánh Giá và đọc', read:'Đọc', and:'và',
+                todayIs:'Hôm nay:', recommendedMystery:'Mầu nhiệm khuyến nghị:'
             },
             en: {
                 title:'Holy Rosary', total:'Total', days:'days', next:'Next', prev:'Back',
@@ -77,7 +86,8 @@
                 share:'Share', selectMystery:'Select Mystery:', view5Mysteries:'View 5 Mysteries',
                 history:'History:', quote:'"Holy Mary, Mother of God, pray for us"', prayersTitle:'Prayers',
                 decade:'Decade', copied:'Copied!', mysteryPrefix:'Mystery',
-                signCross:'Sign of the Cross and', read:'Pray', and:'and'
+                signCross:'Sign of the Cross and', read:'Pray', and:'and',
+                todayIs:'Today:', recommendedMystery:'Recommended Mystery:'
             }
         };
 
@@ -86,18 +96,30 @@
             en: { mysteries: mysteriesData.en, prayers: prayersData.en, ui: uiTexts.en }
         };
 
-        // ⭐ HÀM TỰ ĐỘNG CHỌN MẦU NHIỆM THEO NGÀY - PHẢI ĐẶT TRƯỚC function App()
+        // ⭐ HÀM LẤY NGÀY THÁNG HIỆN TẠI
+        const getFormattedDate = (language = 'vi') => {
+            const date = new Date();
+            const options = { 
+                weekday: 'long', 
+                year: 'numeric', 
+                month: 'long', 
+                day: 'numeric' 
+            };
+            return date.toLocaleDateString(language === 'vi' ? 'vi-VN' : 'en-US', options);
+        };
+
+        // ⭐ AUTO-SELECT TODAY'S MYSTERY
         const getTodayMystery = (language = 'vi') => {
-            const day = new Date().getDay(); // 0=Chủ Nhật, 1=Thứ 2, ..., 6=Thứ 7
+            const day = new Date().getDay();
             const mysteryMap = {
                 vi: {
-                    0: 'Mầu Nhiệm Mừng',    // Chủ Nhật
-                    1: 'Mầu Nhiệm Vui',     // Thứ 2
-                    2: 'Mầu Nhiệm Thương',  // Thứ 3
-                    3: 'Mầu Nhiệm Mừng',    // Thứ 4
-                    4: 'Mầu Nhiệm Sáng',    // Thứ 5
-                    5: 'Mầu Nhiệm Thương',  // Thứ 6
-                    6: 'Mầu Nhiệm Vui'      // Thứ 7
+                    0: 'Mầu Nhiệm Mừng',
+                    1: 'Mầu Nhiệm Vui',
+                    2: 'Mầu Nhiệm Thương',
+                    3: 'Mầu Nhiệm Mừng',
+                    4: 'Mầu Nhiệm Sáng',
+                    5: 'Mầu Nhiệm Thương',
+                    6: 'Mầu Nhiệm Vui'
                 },
                 en: {
                     0: 'Glorious Mysteries',
@@ -109,9 +131,7 @@
                     6: 'Joyful Mysteries'
                 }
             };
-            const result = mysteryMap[language][day];
-            console.log(`🔍 getTodayMystery: day=${day}, lang=${language}, result=${result}`);
-            return result;
+            return mysteryMap[language][day];
         };
 
         function App(){
@@ -120,14 +140,13 @@
                   [hist,setHist]=useState([]),[dark,setDark]=useState(true),[share,setShare]=useState(false),
                   [total,setTotal]=useState(0),[streak,setStreak]=useState(0),[lang,setLang]=useState('vi'),[fontSize,setFontSize]=useState('medium');
             
-            // ⭐ KHỞI TẠO MẦU NHIỆM - Lấy từ localStorage hoặc mặc định theo ngày
             const [mys,setMys]=useState(()=>{
                 const saved=localStorage.getItem('rosaryData');
                 const savedLang = saved ? JSON.parse(saved).language || 'vi' : 'vi';
-                const todayMystery = getTodayMystery(savedLang);
-                console.log(`✅ Initial mystery: ${todayMystery}`);
-                return todayMystery;
+                return getTodayMystery(savedLang);
             });
+            
+            const [currentDate, setCurrentDate] = useState(getFormattedDate(lang));
             
             const nextBtnRef=useRef(null), prevBtnRef=useRef(null);
            
@@ -143,13 +162,18 @@
                 }
             },[]);
 
+            // ⭐ CẬP NHẬT NGÀY THÁNG KHI ĐỔI NGÔN NGỮ
+            useEffect(() => {
+                setCurrentDate(getFormattedDate(lang));
+            }, [lang]);
+
             const t=translations[lang], M=t.mysteries, P=t.prayers;
             const mysteryKeys={'Mầu Nhiệm Vui':'Joyful Mysteries','Mầu Nhiệm Thương':'Sorrowful Mysteries','Mầu Nhiệm Mừng':'Glorious Mysteries','Mầu Nhiệm Sáng':'Luminous Mysteries'};
             const currentMysKey=lang==='vi'?mys:mysteryKeys[mys]||'Joyful Mysteries';
             
             const steps=[
                 {i:lang==='vi'?t.ui.signCross+' '+t.prayers['Kinh Tin Kính'].split('.')[0]:t.ui.signCross+' '+Object.keys(t.prayers)[0],p:Object.keys(t.prayers)[0],c:1,e:'✝️'},
-                {i:t.ui.read+' '+Object.keys(t.prayers)[1],p:Object.keys(t.prayers)[1],c:1,e:'🙏'},
+                {i:t.ui.read+' '+Object.keys(t.prayers)[1],p:Object.keys(t.prayers)[1],c:1,e:' '},
                 {i:t.ui.read+' 3 '+Object.keys(t.prayers)[2],p:Object.keys(t.prayers)[2],c:3,e:'📿'},
                 {i:t.ui.read+' '+Object.keys(t.prayers)[3],p:Object.keys(t.prayers)[3],c:1,e:'✨'}
             ];
@@ -160,7 +184,7 @@
                 const dIdx=Math.floor((s-4)/4),sInD=(s-4)%4;
                 const dSteps=[
                     {i:(lang==='vi'?t.ui.mysteryPrefix:t.ui.mysteryPrefix)+' '+(dIdx+1)+': '+M[currentMysKey].items[dIdx],p:'mystery',c:0,e:'🌟'},
-                    {i:t.ui.read+' '+Object.keys(t.prayers)[1],p:Object.keys(t.prayers)[1],c:1,e:'🙏'},
+                    {i:t.ui.read+' '+Object.keys(t.prayers)[1],p:Object.keys(t.prayers)[1],c:1,e:' '},
                     {i:t.ui.read+' 10 '+Object.keys(t.prayers)[2],p:Object.keys(t.prayers)[2],c:10,e:'📿'},
                     {i:t.ui.read+' '+Object.keys(t.prayers)[3]+' '+t.ui.and+' '+Object.keys(t.prayers)[5],p:Object.keys(t.prayers)[3],c:1,e:'✨'}
                 ];
@@ -215,7 +239,7 @@
             };
             
             const shareText=()=>{
-                const txt=lang==='vi'?`🙏 Tôi vừa lần Mân Côi (${currentMysKey})!\n\n📊 Tổng: ${total} lần\n🔥 Chuỗi: ${streak} ngày\n\n#MânCôi`:`🙏 I just prayed the Rosary (${currentMysKey})!\n\n📊 Total: ${total} times\n🔥 Streak: ${streak} days\n\n#Rosary`;
+                const txt=lang==='vi'?`  Tôi vừa lần Mân Côi (${currentMysKey})!\n\n📊 Tổng: ${total} lần\n🔥 Chuỗi: ${streak} ngày\n\n#MânCôi`:`  I just prayed the Rosary (${currentMysKey})!\n\n📊 Total: ${total} times\n🔥 Streak: ${streak} days\n\n#Rosary`;
                 if(navigator.share)navigator.share({title:lang==='vi'?'Mân Côi':'Holy Rosary',text:txt});
                 else{navigator.clipboard.writeText(txt);setShare(true);setTimeout(()=>setShare(false),2000);}
             };
@@ -246,17 +270,18 @@
             return React.createElement('div',{className:`min-h-screen ${bg} flex items-center justify-center p-4 transition-colors duration-500`},
                 React.createElement('div',{className:'w-full max-w-md'},
                     React.createElement('div',{className:`${card} backdrop-blur-lg rounded-3xl shadow-2xl p-8 border transition-colors duration-500`},
-                        React.createElement('div',{className:'flex justify-between items-start mb-6'},
-                            React.createElement('div',{className:'flex gap-2'},
-                                React.createElement('button',{onClick:()=>setDark(!dark),className:`${dark?'bg-white/10':'bg-gray-200'} hover:opacity-80 ${txt} p-2 rounded-lg border ${dark?'border-white/20':'border-gray-300'} transition-all`},dark?'🌙':'☀️'),
-                                React.createElement('button',{onClick:toggleLang,className:`${dark?'bg-white/10':'bg-gray-200'} hover:opacity-80 ${txt} px-3 py-2 rounded-lg border ${dark?'border-white/20':'border-gray-300'} text-sm font-semibold transition-all`},lang==='vi'?'EN':'VI'),
-                                React.createElement('button',{onClick:toggleFontSize,className:`${dark?'bg-white/10':'bg-gray-200'} hover:opacity-80 ${txt} px-3 py-2 rounded-lg border ${dark?'border-white/20':'border-gray-300'} text-sm font-semibold transition-all`},fontSize==='small'?'A-':fontSize==='large'?'A+':'Aa')
-                            ),
-                            React.createElement('div',{className:'text-right'},
-                                React.createElement('div',{className:`text-xs ${txt2}`},t.ui.total),
-                                React.createElement('div',{className:`text-lg font-bold ${txt}`},total),
-                                React.createElement('div',{className:`text-xs ${txt2}`},`🔥 ${streak} ${t.ui.days}`)
+                        
+                        React.createElement('div',{className:`date-banner rounded-2xl p-4 mb-4 fade-in`},
+                            React.createElement('div',{className:'text-center'},
+                                React.createElement('div',{className:`text-xs ${dark?'text-blue-300/80':'text-gray-600'} font-medium mb-1`},'📅 '+t.ui.todayIs),
+                                React.createElement('div',{className:`text-sm ${txt} font-bold mb-1`},currentDate),
+                                React.createElement('div',{className:`text-sm ${dark?'text-yellow-300':'text-blue-600'} font-semibold`},currentMysKey)
                             )
+                        ),
+                        React.createElement('div',{className:'flex justify-end gap-2 mb-6'},
+                            React.createElement('button',{onClick:()=>setDark(!dark),className:`${dark?'bg-white/10':'bg-gray-200'} hover:opacity-80 ${txt} p-2 rounded-lg border ${dark?'border-white/20':'border-gray-300'} transition-all`},dark?'🌙':'☀️'),
+                            React.createElement('button',{onClick:toggleLang,className:`${dark?'bg-white/10':'bg-gray-200'} hover:opacity-80 ${txt} px-3 py-2 rounded-lg border ${dark?'border-white/20':'border-gray-300'} text-sm font-semibold transition-all`},lang==='vi'?'EN':'VI'),
+                            React.createElement('button',{onClick:toggleFontSize,className:`${dark?'bg-white/10':'bg-gray-200'} hover:opacity-80 ${txt} px-3 py-2 rounded-lg border ${dark?'border-white/20':'border-gray-300'} text-sm font-semibold transition-all`},fontSize==='small'?'A-':fontSize==='large'?'A+':'Aa')
                         ),
                         React.createElement('div',{className:'text-center mb-6'},
                             React.createElement('div',{className:`inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br ${cm.color} rounded-full mb-4 shadow-lg ${s>0?'animate-pulse':''}`},'❤️'),
@@ -362,25 +387,27 @@
                 share&&React.createElement('div',{className:'fixed bottom-4 left-1/2 transform -translate-x-1/2 bg-green-500 text-white px-6 py-3 rounded-full shadow-lg z-50 animate-bounce'},`✅ ${t.ui.copied}`)
             );
         }
-        ReactDOM.render(React.createElement(App),document.getElementById('root'));
+        
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(React.createElement(App));
     </script>
     
     <script>
         if('serviceWorker' in navigator){
             window.addEventListener('load',()=>{
                 navigator.serviceWorker.register('/service-worker.js')
-                    .then(reg=>console.log('SW registered:',reg.scope))
-                    .catch(err=>console.log('SW registration failed:',err));
+                    .then(reg=>console.log('✅ SW registered:',reg.scope))
+                    .catch(err=>console.log('❌ SW registration failed:',err));
             });
         }
         let deferredPrompt;
         window.addEventListener('beforeinstallprompt',e=>{
             e.preventDefault();
             deferredPrompt=e;
-            console.log('PWA install prompt ready');
+            console.log('✅ PWA install prompt ready');
         });
         window.addEventListener('appinstalled',()=>{
-            console.log('PWA installed successfully');
+            console.log('✅ PWA installed successfully');
             deferredPrompt=null;
         });
     </script>
