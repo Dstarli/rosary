@@ -137,7 +137,7 @@
         function App(){
             const [s,setS]=useState(0),[bc,setBc]=useState(0),[dec,setDec]=useState(0),
                   [showP,setShowP]=useState(false),[showM,setShowM]=useState(false),[showCredit,setShowCredit]=useState(false),
-                  [hist,setHist]=useState([]),[dark,setDark]=useState(true),[share,setShare]=useState(false),
+                  [hist,setHist]=useState([]),[theme,setTheme]=useState('softDark'),[share,setShare]=useState(false),
                   [total,setTotal]=useState(0),[streak,setStreak]=useState(0),[lang,setLang]=useState('vi'),[fontSize,setFontSize]=useState('medium');
             
             const [mys,setMys]=useState(()=>{
@@ -159,6 +159,7 @@
                     setStreak(d.streak||0);
                     setLang(d.language||'vi');
                     setFontSize(d.fontSize||'medium');
+                    setTheme(d.theme||'softDark');
                 }
             },[]);
 
@@ -173,7 +174,7 @@
             
             const steps=[
                 {i:lang==='vi'?t.ui.signCross+' '+t.prayers['Kinh Tin Kính'].split('.')[0]:t.ui.signCross+' '+Object.keys(t.prayers)[0],p:Object.keys(t.prayers)[0],c:1,e:'✝️'},
-                {i:t.ui.read+' '+Object.keys(t.prayers)[1],p:Object.keys(t.prayers)[1],c:1,e:' '},
+                {i:t.ui.read+' '+Object.keys(t.prayers)[1],p:Object.keys(t.prayers)[1],c:1,e:'�'},
                 {i:t.ui.read+' 3 '+Object.keys(t.prayers)[2],p:Object.keys(t.prayers)[2],c:3,e:'📿'},
                 {i:t.ui.read+' '+Object.keys(t.prayers)[3],p:Object.keys(t.prayers)[3],c:1,e:'✨'}
             ];
@@ -184,7 +185,7 @@
                 const dIdx=Math.floor((s-4)/4),sInD=(s-4)%4;
                 const dSteps=[
                     {i:(lang==='vi'?t.ui.mysteryPrefix:t.ui.mysteryPrefix)+' '+(dIdx+1)+': '+M[currentMysKey].items[dIdx],p:'mystery',c:0,e:'🌟'},
-                    {i:t.ui.read+' '+Object.keys(t.prayers)[1],p:Object.keys(t.prayers)[1],c:1,e:' '},
+                    {i:t.ui.read+' '+Object.keys(t.prayers)[1],p:Object.keys(t.prayers)[1],c:1,e:'�'},
                     {i:t.ui.read+' 10 '+Object.keys(t.prayers)[2],p:Object.keys(t.prayers)[2],c:10,e:'📿'},
                     {i:t.ui.read+' '+Object.keys(t.prayers)[3]+' '+t.ui.and+' '+Object.keys(t.prayers)[5],p:Object.keys(t.prayers)[3],c:1,e:'✨'}
                 ];
@@ -218,7 +219,7 @@
                         const sess={mystery:currentMysKey,date:new Date().toLocaleString(lang==='vi'?'vi-VN':'en-US'),completed:true};
                         const newH=[sess,...hist.slice(0,9)],newT=total+1,newS=streak+1;
                         setHist(newH);setTotal(newT);setStreak(newS);
-                        localStorage.setItem('rosaryData',JSON.stringify({history:newH,totalPrayers:newT,streak:newS,language:lang,fontSize:fontSize}));
+                        localStorage.setItem('rosaryData',JSON.stringify({history:newH,totalPrayers:newT,streak:newS,language:lang,fontSize:fontSize,theme:theme}));
                         setS(0);setBc(0);setDec(0);
                     }
                 }else{setBc(bc+1);}
@@ -239,9 +240,19 @@
             };
             
             const shareText=()=>{
-                const txt=lang==='vi'?`  Tôi vừa lần Mân Côi (${currentMysKey})!\n\n📊 Tổng: ${total} lần\n🔥 Chuỗi: ${streak} ngày\n\n#MânCôi`:`  I just prayed the Rosary (${currentMysKey})!\n\n📊 Total: ${total} times\n🔥 Streak: ${streak} days\n\n#Rosary`;
+                const txt=lang==='vi'?`� Tôi vừa lần Mân Côi (${currentMysKey})!\n\n📊 Tổng: ${total} lần\n🔥 Chuỗi: ${streak} ngày\n\n#MânCôi`:`� I just prayed the Rosary (${currentMysKey})!\n\n📊 Total: ${total} times\n🔥 Streak: ${streak} days\n\n#Rosary`;
                 if(navigator.share)navigator.share({title:lang==='vi'?'Mân Côi':'Holy Rosary',text:txt});
                 else{navigator.clipboard.writeText(txt);setShare(true);setTimeout(()=>setShare(false),2000);}
+            };
+            
+            const toggleTheme=()=>{
+                const themes=['light','softDark','deepDark'];
+                const idx=themes.indexOf(theme);
+                const newTheme=themes[(idx+1)%3];
+                setTheme(newTheme);
+                const saved=localStorage.getItem('rosaryData');
+                if(saved){const d=JSON.parse(saved);d.theme=newTheme;localStorage.setItem('rosaryData',JSON.stringify(d));}
+                else{localStorage.setItem('rosaryData',JSON.stringify({theme:newTheme,history:[],totalPrayers:0,streak:0,language:lang,fontSize:fontSize}));}
             };
             
             const toggleLang=()=>{
@@ -263,9 +274,38 @@
             };
             
             const cur=getStep(),cm=M[currentMysKey],prog=(s/25)*100;
-            const bg=dark?'bg-gradient-to-br from-blue-900 via-purple-900 to-indigo-900':'bg-gradient-to-br from-blue-100 via-purple-100 to-pink-100';
-            const card=dark?'bg-white/10 border-white/20':'bg-white/80 border-gray-200';
-            const txt=dark?'text-white':'text-gray-900',txt2=dark?'text-blue-200':'text-gray-600';
+            
+            // 🎨 Theme Colors - Tối ưu trải nghiệm
+            const themeConfig = {
+                light: {
+                    bg: 'bg-gradient-to-br from-blue-100 via-purple-100 to-pink-100',
+                    card: 'bg-white/80 border-gray-200',
+                    txt: 'text-gray-900',
+                    txt2: 'text-gray-600',
+                    icon: '☀️'
+                },
+                softDark: {
+                    bg: 'bg-gradient-to-br from-slate-700 via-purple-800 to-slate-900',
+                    card: 'bg-white/10 border-white/20',
+                    txt: 'text-white',
+                    txt2: 'text-purple-200',
+                    icon: '🌙'
+                },
+                deepDark: {
+                    bg: 'bg-gradient-to-br from-gray-950 via-purple-950 to-black',
+                    card: 'bg-white/5 border-white/10',
+                    txt: 'text-white',
+                    txt2: 'text-purple-300',
+                    icon: '🌑'
+                }
+            };
+            
+            const currentTheme = themeConfig[theme];
+            const bg = currentTheme.bg;
+            const card = currentTheme.card;
+            const txt = currentTheme.txt;
+            const txt2 = currentTheme.txt2;
+            const isDark = theme !== 'light';
 
             return React.createElement('div',{className:`min-h-screen ${bg} flex items-center justify-center p-4 transition-colors duration-500`},
                 React.createElement('div',{className:'w-full max-w-md'},
@@ -273,26 +313,26 @@
                         
                         React.createElement('div',{className:`date-banner rounded-2xl p-4 mb-4 fade-in`},
                             React.createElement('div',{className:'text-center'},
-                                React.createElement('div',{className:`text-xs ${dark?'text-blue-300/80':'text-gray-600'} font-medium mb-1`},'📅 '+t.ui.todayIs),
+                                React.createElement('div',{className:`text-xs ${isDark?'text-blue-300/80':'text-gray-600'} font-medium mb-1`},'📅 '+t.ui.todayIs),
                                 React.createElement('div',{className:`text-sm ${txt} font-bold mb-1`},currentDate),
-                                React.createElement('div',{className:`text-sm ${dark?'text-yellow-300':'text-blue-600'} font-semibold`},currentMysKey)
+                                React.createElement('div',{className:`text-sm ${isDark?'text-yellow-300':'text-blue-600'} font-semibold`},currentMysKey)
                             )
                         ),
                         React.createElement('div',{className:'flex justify-end gap-2 mb-6'},
-                            React.createElement('button',{onClick:()=>setDark(!dark),className:`${dark?'bg-white/10':'bg-gray-200'} hover:opacity-80 ${txt} p-2 rounded-lg border ${dark?'border-white/20':'border-gray-300'} transition-all`},dark?'🌙':'☀️'),
-                            React.createElement('button',{onClick:toggleLang,className:`${dark?'bg-white/10':'bg-gray-200'} hover:opacity-80 ${txt} px-3 py-2 rounded-lg border ${dark?'border-white/20':'border-gray-300'} text-sm font-semibold transition-all`},lang==='vi'?'EN':'VI'),
-                            React.createElement('button',{onClick:toggleFontSize,className:`${dark?'bg-white/10':'bg-gray-200'} hover:opacity-80 ${txt} px-3 py-2 rounded-lg border ${dark?'border-white/20':'border-gray-300'} text-sm font-semibold transition-all`},fontSize==='small'?'A-':fontSize==='large'?'A+':'Aa')
+                            React.createElement('button',{onClick:toggleTheme,className:`${isDark?'bg-white/10':'bg-gray-200'} hover:opacity-80 ${txt} p-2 rounded-lg border ${isDark?'border-white/20':'border-gray-300'} transition-all`,title:theme==='light'?'Light Mode':theme==='softDark'?'Soft Dark':'Deep Dark'},currentTheme.icon),
+                            React.createElement('button',{onClick:toggleLang,className:`${isDark?'bg-white/10':'bg-gray-200'} hover:opacity-80 ${txt} px-3 py-2 rounded-lg border ${isDark?'border-white/20':'border-gray-300'} text-sm font-semibold transition-all`},lang==='vi'?'EN':'VI'),
+                            React.createElement('button',{onClick:toggleFontSize,className:`${isDark?'bg-white/10':'bg-gray-200'} hover:opacity-80 ${txt} px-3 py-2 rounded-lg border ${isDark?'border-white/20':'border-gray-300'} text-sm font-semibold transition-all`},fontSize==='small'?'A-':fontSize==='large'?'A+':'Aa')
                         ),
                         React.createElement('div',{className:'text-center mb-6'},
                             React.createElement('div',{className:`inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br ${cm.color} rounded-full mb-4 shadow-lg ${s>0?'animate-pulse':''}`},'❤️'),
                             React.createElement('h1',{className:`text-3xl font-bold ${txt} mb-2`},t.ui.title),
                             React.createElement('p',{className:txt2+' text-sm font-medium'},currentMysKey),
-                            React.createElement('p',{className:`${dark?'text-blue-300/60':'text-gray-500'} text-xs`},cm.days)
+                            React.createElement('p',{className:`${isDark?'text-blue-300/60':'text-gray-500'} text-xs`},cm.days)
                         ),
-                        React.createElement('div',{className:`${dark?'bg-white/5':'bg-gray-200'} rounded-full h-2 mb-6`},
+                        React.createElement('div',{className:`${isDark?'bg-white/5':'bg-gray-200'} rounded-full h-2 mb-6`},
                             React.createElement('div',{className:`bg-gradient-to-r ${cm.color} h-2 rounded-full transition-all duration-300`,style:{width:`${prog}%`}})
                         ),
-                        React.createElement('div',{className:`${dark?'bg-white/5':'bg-gray-50'} rounded-2xl p-6 mb-6 border ${dark?'border-white/10':'border-gray-200'} prayer-container`},
+                        React.createElement('div',{className:`${isDark?'bg-white/5':'bg-gray-50'} rounded-2xl p-6 mb-6 border ${isDark?'border-white/10':'border-gray-200'} prayer-container`},
                             React.createElement('div',{key:s,className:'prayer-content-scroll fade-slide'},
                                 React.createElement('div',{className:'text-center mb-4'},
                                     cur.e==='🌟'&&React.createElement('div',{className:'text-6xl mb-2'},cur.e),
@@ -300,8 +340,8 @@
                                     cur.c>1&&React.createElement('div',{className:`${txt2} text-3xl font-bold mb-3`},`${bc+1} / ${cur.c}`),
                                     s===25&&React.createElement('div',{className:'text-yellow-400 font-bold text-xl animate-bounce mt-2'},`✨ ${t.ui.completed} ✨`)
                                 ),
-                                cur.p&&cur.p!=='mystery'&&React.createElement('div',{className:`${dark?'bg-white/5 border-white/10':'bg-white border-gray-200'} rounded-xl p-4 border`},
-                                    React.createElement('p',{className:`${dark?'text-white/80':'text-gray-700'} leading-relaxed text-center prayer-text text-size-`+fontSize,style:{whiteSpace:'pre-line'}},
+                                cur.p&&cur.p!=='mystery'&&React.createElement('div',{className:`${isDark?'bg-white/5 border-white/10':'bg-white border-gray-200'} rounded-xl p-4 border`},
+                                    React.createElement('p',{className:`${isDark?'text-white/80':'text-gray-700'} leading-relaxed text-center prayer-text text-size-`+fontSize,style:{whiteSpace:'pre-line'}},
                                         cur.p===Object.keys(P)[3]&&s>=4&&s<24&&(s-4)%4===3?P[cur.p]+'\n\n'+Object.keys(P)[5]+':\n'+P[Object.keys(P)[5]]:P[cur.p]
                                     )
                                 )
@@ -311,76 +351,76 @@
                                 React.createElement('button',{ref:nextBtnRef,onClick:next,className:`btn-action bg-gradient-to-r ${cm.color} text-white font-medium py-4 rounded-xl shadow-md`},s===25?t.ui.complete:t.ui.next)
                             ),
                             s>=4&&s<24&&React.createElement('div',{className:'flex items-center justify-center gap-2 mt-3'},
-                                React.createElement('div',{className:'flex gap-1'},[0,1,2,3,4].map(i=>React.createElement('div',{key:i,className:`w-3 h-3 rounded-full transition-all ${i<dec?`bg-gradient-to-br ${cm.color} shadow-lg`:dark?'bg-white/20':'bg-gray-300'}`}))),
-                                React.createElement('span',{className:`text-xs ${dark?'text-white/80':'text-gray-600'}`},`${t.ui.decade} ${dec}/5`)
+                                React.createElement('div',{className:'flex gap-1'},[0,1,2,3,4].map(i=>React.createElement('div',{key:i,className:`w-3 h-3 rounded-full transition-all ${i<dec?`bg-gradient-to-br ${cm.color} shadow-lg`:isDark?'bg-white/20':'bg-gray-300'}`}))),
+                                React.createElement('span',{className:`text-xs ${isDark?'text-white/80':'text-gray-600'}`},`${t.ui.decade} ${dec}/5`)
                             )
                         ),
                         React.createElement('div',{className:'space-y-3 mb-6'},
                             React.createElement('div',{className:'grid grid-cols-3 gap-3'},
-                                React.createElement('button',{onClick:()=>setShowP(!showP),className:`${dark?'bg-white/10 border-white/20':'bg-gray-200 border-gray-300'} hover:opacity-80 ${txt} font-semibold py-3 rounded-xl border text-sm transition-all`},'📖 '+t.ui.prayers),
-                                React.createElement('button',{onClick:()=>setShowCredit(true),className:`${dark?'bg-white/10 border-white/20':'bg-gray-200 border-gray-300'} hover:opacity-80 ${txt} font-semibold py-3 rounded-xl border text-sm transition-all`},'ℹ️'),
-                                React.createElement('button',{onClick:shareText,className:`${dark?'bg-white/10 border-white/20':'bg-gray-200 border-gray-300'} hover:opacity-80 ${txt} font-semibold py-3 rounded-xl border text-sm transition-all`},'📤 '+t.ui.share)
+                                React.createElement('button',{onClick:()=>setShowP(!showP),className:`${isDark?'bg-white/10 border-white/20':'bg-gray-200 border-gray-300'} hover:opacity-80 ${txt} font-semibold py-3 rounded-xl border text-sm transition-all`},'📖 '+t.ui.prayers),
+                                React.createElement('button',{onClick:()=>setShowCredit(true),className:`${isDark?'bg-white/10 border-white/20':'bg-gray-200 border-gray-300'} hover:opacity-80 ${txt} font-semibold py-3 rounded-xl border text-sm transition-all`},'ℹ️'),
+                                React.createElement('button',{onClick:shareText,className:`${isDark?'bg-white/10 border-white/20':'bg-gray-200 border-gray-300'} hover:opacity-80 ${txt} font-semibold py-3 rounded-xl border text-sm transition-all`},'📤 '+t.ui.share)
                             )
                         ),
-                        React.createElement('div',{className:`${dark?'bg-white/5 border-white/10':'bg-gray-50 border-gray-200'} rounded-xl p-4 border mb-4`},
-                            React.createElement('label',{className:`${dark?'text-white/70':'text-gray-600'} text-xs mb-2 block`},t.ui.selectMystery),
-                            React.createElement('select',{value:currentMysKey,onChange:e=>setMys(e.target.value),className:`w-full ${dark?'bg-white/10 border-white/20':'bg-white border-gray-300'} ${txt} border rounded-lg px-3 py-2 text-sm focus:outline-none transition-all`},
+                        React.createElement('div',{className:`${isDark?'bg-white/5 border-white/10':'bg-gray-50 border-gray-200'} rounded-xl p-4 border mb-4`},
+                            React.createElement('label',{className:`${isDark?'text-white/70':'text-gray-600'} text-xs mb-2 block`},t.ui.selectMystery),
+                            React.createElement('select',{value:currentMysKey,onChange:e=>setMys(e.target.value),className:`w-full ${isDark?'bg-white/10 border-white/20':'bg-white border-gray-300'} ${txt} border rounded-lg px-3 py-2 text-sm focus:outline-none transition-all`},
                                 Object.keys(M).map(m=>React.createElement('option',{key:m,value:m},`${m} - ${M[m].days}`))
                             ),
-                            React.createElement('button',{onClick:()=>setShowM(true),className:`w-full mt-2 ${dark?'bg-white/5':'bg-gray-100'} ${txt} text-xs py-2 rounded-lg hover:opacity-80 transition-all`},`📖 ${t.ui.view5Mysteries} ${lang==='vi'?currentMysKey.replace('Mầu Nhiệm ',''):currentMysKey.replace(' Mysteries','')}`)
+                            React.createElement('button',{onClick:()=>setShowM(true),className:`w-full mt-2 ${isDark?'bg-white/5':'bg-gray-100'} ${txt} text-xs py-2 rounded-lg hover:opacity-80 transition-all`},`📖 ${t.ui.view5Mysteries} ${lang==='vi'?currentMysKey.replace('Mầu Nhiệm ',''):currentMysKey.replace(' Mysteries','')}`)
                         ),
-                        hist.length>0&&React.createElement('div',{className:`${dark?'bg-white/5 border-white/10':'bg-gray-50 border-gray-200'} rounded-xl p-4 border mb-4`},
-                            React.createElement('h3',{className:`${dark?'text-white/70':'text-gray-600'} text-xs mb-2`},t.ui.history),
+                        hist.length>0&&React.createElement('div',{className:`${isDark?'bg-white/5 border-white/10':'bg-gray-50 border-gray-200'} rounded-xl p-4 border mb-4`},
+                            React.createElement('h3',{className:`${isDark?'text-white/70':'text-gray-600'} text-xs mb-2`},t.ui.history),
                             React.createElement('div',{className:'space-y-2 max-h-32 overflow-y-auto'},
-                                hist.map((h,i)=>React.createElement('div',{key:i,className:`text-xs ${dark?'text-white/60':'text-gray-600'} flex justify-between`},
+                                hist.map((h,i)=>React.createElement('div',{key:i,className:`text-xs ${isDark?'text-white/60':'text-gray-600'} flex justify-between`},
                                     React.createElement('span',null,`✅ ${h.mystery}`),
                                     React.createElement('span',null,h.date)
                                 ))
                             )
                         ),
                         React.createElement('div',{className:'text-center'},
-                            React.createElement('p',{className:`${dark?'text-white/50':'text-gray-400'} text-xs`},t.ui.quote)
+                            React.createElement('p',{className:`${isDark?'text-white/50':'text-gray-400'} text-xs`},t.ui.quote)
                         )
                     )
                 ),
                 showP&&React.createElement('div',{className:'fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50',onClick:()=>setShowP(false)},
-                    React.createElement('div',{className:`${dark?'bg-gradient-to-br from-blue-900 to-purple-900':'bg-white'} rounded-3xl p-6 max-w-lg w-full max-h-[80vh] overflow-y-auto border ${dark?'border-white/20':'border-gray-200'}`,onClick:e=>e.stopPropagation()},
+                    React.createElement('div',{className:`${isDark?'bg-gradient-to-br from-blue-900 to-purple-900':'bg-white'} rounded-3xl p-6 max-w-lg w-full max-h-[80vh] overflow-y-auto border ${isDark?'border-white/20':'border-gray-200'}`,onClick:e=>e.stopPropagation()},
                         React.createElement('div',{className:'flex justify-between items-center mb-4'},
                             React.createElement('h2',{className:`text-2xl font-bold ${txt}`},t.ui.prayersTitle),
-                            React.createElement('button',{onClick:()=>setShowP(false),className:`${dark?'text-white/70':'text-gray-600'} text-2xl font-bold`},'×')
+                            React.createElement('button',{onClick:()=>setShowP(false),className:`${isDark?'text-white/70':'text-gray-600'} text-2xl font-bold`},'×')
                         ),
                         React.createElement('div',{className:'space-y-6'},
-                            Object.entries(P).map(([title,prayer])=>React.createElement('div',{key:title,className:`${dark?'bg-white/10 border-white/20':'bg-gray-50 border-gray-200'} rounded-xl p-4 border`},
-                                React.createElement('h3',{className:`text-lg font-semibold ${dark?'text-yellow-300':'text-blue-600'} mb-2`},title),
-                                React.createElement('p',{className:`${dark?'text-white/90':'text-gray-700'} text-sm leading-relaxed`},prayer)
+                            Object.entries(P).map(([title,prayer])=>React.createElement('div',{key:title,className:`${isDark?'bg-white/10 border-white/20':'bg-gray-50 border-gray-200'} rounded-xl p-4 border`},
+                                React.createElement('h3',{className:`text-lg font-semibold ${isDark?'text-yellow-300':'text-blue-600'} mb-2`},title),
+                                React.createElement('p',{className:`${isDark?'text-white/90':'text-gray-700'} text-sm leading-relaxed`},prayer)
                             ))
                         )
                     )
                 ),
                 showM&&React.createElement('div',{className:'fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50',onClick:()=>setShowM(false)},
-                    React.createElement('div',{className:`${dark?'bg-gradient-to-br from-blue-900 to-purple-900':'bg-white'} rounded-3xl p-6 max-w-lg w-full max-h-[80vh] overflow-y-auto border ${dark?'border-white/20':'border-gray-200'}`,onClick:e=>e.stopPropagation()},
+                    React.createElement('div',{className:`${isDark?'bg-gradient-to-br from-blue-900 to-purple-900':'bg-white'} rounded-3xl p-6 max-w-lg w-full max-h-[80vh] overflow-y-auto border ${isDark?'border-white/20':'border-gray-200'}`,onClick:e=>e.stopPropagation()},
                         React.createElement('div',{className:'flex justify-between items-center mb-4'},
                             React.createElement('h2',{className:`text-2xl font-bold ${txt}`},lang==='vi'?`5 Sự ${currentMysKey.replace('Mầu Nhiệm ','')}`:currentMysKey.replace(' Mysteries','')),
-                            React.createElement('button',{onClick:()=>setShowM(false),className:`${dark?'text-white/70':'text-gray-600'} text-2xl font-bold`},'×')
+                            React.createElement('button',{onClick:()=>setShowM(false),className:`${isDark?'text-white/70':'text-gray-600'} text-2xl font-bold`},'×')
                         ),
                         React.createElement('div',{className:'space-y-4'},
-                            cm.items.map((item,idx)=>React.createElement('div',{key:idx,className:`${dark?'bg-white/10 border-white/20':'bg-gray-50 border-gray-200'} rounded-xl p-4 border`},
-                                React.createElement('p',{className:`${dark?'text-white/90':'text-gray-700'} text-sm leading-relaxed`},(lang==='vi'?'Thứ':'Mystery')+` ${idx+1}: ${item}`)
+                            cm.items.map((item,idx)=>React.createElement('div',{key:idx,className:`${isDark?'bg-white/10 border-white/20':'bg-gray-50 border-gray-200'} rounded-xl p-4 border`},
+                                React.createElement('p',{className:`${isDark?'text-white/90':'text-gray-700'} text-sm leading-relaxed`},(lang==='vi'?'Thứ':'Mystery')+` ${idx+1}: ${item}`)
                             ))
                         )
                     )
                 ),
                 showCredit&&React.createElement('div',{className:'fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50',onClick:()=>setShowCredit(false)},
-                    React.createElement('div',{className:`${dark?'bg-gradient-to-br from-blue-900 to-purple-900':'bg-white'} rounded-3xl p-6 max-w-lg w-full border ${dark?'border-white/20':'border-gray-200'}`,onClick:e=>e.stopPropagation()},
+                    React.createElement('div',{className:`${isDark?'bg-gradient-to-br from-blue-900 to-purple-900':'bg-white'} rounded-3xl p-6 max-w-lg w-full border ${isDark?'border-white/20':'border-gray-200'}`,onClick:e=>e.stopPropagation()},
                         React.createElement('div',{className:'flex justify-between items-center mb-4'},
                             React.createElement('h2',{className:`text-2xl font-bold ${txt}`},lang==='vi'?'Thông Tin':'Information'),
-                            React.createElement('button',{onClick:()=>setShowCredit(false),className:`${dark?'text-white/70':'text-gray-600'} text-2xl font-bold`},'×')
+                            React.createElement('button',{onClick:()=>setShowCredit(false),className:`${isDark?'text-white/70':'text-gray-600'} text-2xl font-bold`},'×')
                         ),
-                        React.createElement('div',{className:`${dark?'bg-white/10 border-white/20':'bg-gray-50 border-gray-200'} rounded-xl p-6 border text-center`},
+                        React.createElement('div',{className:`${isDark?'bg-white/10 border-white/20':'bg-gray-50 border-gray-200'} rounded-xl p-6 border text-center`},
                             React.createElement('div',{className:'text-6xl mb-4'},'❤️'),
                             React.createElement('h3',{className:`text-xl font-semibold ${txt} mb-3`},lang==='vi'?'Cảm ơn mọi người':'Thank You'),
-                            React.createElement('p',{className:`${dark?'text-white/80':'text-gray-700'} text-sm leading-relaxed mb-4`},lang==='vi'?'Cảm ơn bạn đã sử dụng ứng dụng Mân Côi. Xin Đức Mẹ Maria luôn phù hộ và ban phước lành cho bạn và gia đình.':'Thank you for using the Holy Rosary app. May the Blessed Virgin Mary always protect and bless you and your family.'),
-                            React.createElement('div',{className:`${dark?'text-blue-300':'text-blue-600'} text-xs mt-4 pt-4 border-t ${dark?'border-white/20':'border-gray-200'}`},'Version 3.0 • Developer: Hứa Hoàng Thiện')
+                            React.createElement('p',{className:`${isDark?'text-white/80':'text-gray-700'} text-sm leading-relaxed mb-4`},lang==='vi'?'Cảm ơn bạn đã sử dụng ứng dụng Mân Côi. Xin Đức Mẹ Maria luôn phù hộ và ban phước lành cho bạn và gia đình.':'Thank you for using the Holy Rosary app. May the Blessed Virgin Mary always protect and bless you and your family.'),
+                            React.createElement('div',{className:`${isDark?'text-blue-300':'text-blue-600'} text-xs mt-4 pt-4 border-t ${isDark?'border-white/20':'border-gray-200'}`},'Version 3.0 • Developer: Hứa Hoàng Thiện')
                         )
                     )
                 ),
