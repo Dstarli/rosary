@@ -3,11 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ứng Dụng Lần Hạt Mân Côi</title>
+    <title>Ứng Dụng Cầu Nguyện</title>
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#1e3a8a">
     <link rel="apple-touch-icon" href="icon-192.png">
-    <meta name="description" content="Ứng dụng hỗ trợ cầu nguyện Mân Côi theo truyền thống Công Giáo">
+    <meta name="description" content="Ứng dụng hỗ trợ cầu nguyện Mân Côi và Chuỗi Lòng Thương Xót">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
@@ -46,12 +46,10 @@
         
         .ripple-effect{position:absolute;border-radius:50%;background:rgba(255,255,255,0.5);pointer-events:none;animation:ripple 0.6s ease-out}
         
-        /* Tailwind gradient matching original theme */
         .app-light{
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         }
         .app-dark{
-            /* Tailwind: from-slate-700 via-purple-800 to-slate-900 */
             background: linear-gradient(135deg, #334155 0%, #6b21a8 50%, #0f172a 100%);
             position: relative;
             overflow: hidden;
@@ -92,7 +90,6 @@
             border: 1px solid rgba(139, 92, 246, 0.3);
         }
         
-        /* Icon Buttons */
         .icon-btn{
             position:relative;
             width:48px;
@@ -145,7 +142,6 @@
             transform:scale(1.15) rotate(5deg);
         }
         
-        /* Tooltip */
         .tooltip{
             position:absolute;
             bottom:calc(100% + 10px);
@@ -180,7 +176,6 @@
             transform:translateX(-50%) scale(1);
         }
         
-        /* Action Grid Buttons */
         .action-btn-grid{
             display:grid;
             grid-template-columns:repeat(4,1fr);
@@ -243,7 +238,6 @@
             opacity:0.95;
         }
         
-        /* Navigation Button Glow */
         .nav-btn-glow{
             position:relative;
         }
@@ -263,10 +257,61 @@
             opacity:1;
         }
         
-        /* Font size indicator styles */
         .font-size-small-indicator{font-size:12px}
         .font-size-medium-indicator{font-size:15px}
         .font-size-large-indicator{font-size:18px}
+        
+        .mode-switch{
+            display:flex;
+            background:rgba(255,255,255,0.1);
+            border-radius:12px;
+            padding:4px;
+            gap:4px;
+        }
+        
+        .mode-switch-btn{
+            flex:1;
+            padding:10px 16px;
+            border-radius:8px;
+            font-size:13px;
+            font-weight:600;
+            transition:all 0.3s;
+            cursor:pointer;
+            border:none;
+            background:transparent;
+        }
+        
+        .mode-switch-btn.active{
+            background:rgba(255,255,255,0.2);
+            box-shadow:0 2px 8px rgba(0,0,0,0.1);
+        }
+        
+        .divine-variant-switch{
+            display:flex;
+            background:rgba(255,255,255,0.08);
+            border-radius:10px;
+            padding:3px;
+            gap:3px;
+            margin-bottom:12px;
+        }
+        
+        .divine-variant-btn{
+            flex:1;
+            padding:8px 12px;
+            border-radius:7px;
+            font-size:11px;
+            font-weight:600;
+            transition:all 0.3s;
+            cursor:pointer;
+            border:none;
+            background:transparent;
+            text-align:center;
+        }
+        
+        .divine-variant-btn.active{
+            background:rgba(255,255,255,0.15);
+            box-shadow:0 2px 6px rgba(0,0,0,0.15);
+        }
     </style>
 </head>
 <body>
@@ -278,14 +323,14 @@
         const {useState,useEffect,useRef}=React;
         
         if (typeof prayersData === 'undefined') {
-            console.error('❌ CRITICAL ERROR: prayersData not loaded from prayers.js!');
+            console.error('⚠ CRITICAL ERROR: prayersData not loaded from prayers.js!');
             document.getElementById('root').innerHTML = '<div style="padding:20px;color:red;font-family:sans-serif;"><h1>Error Loading App</h1><p>prayers.js failed to load. Please check the file exists and is accessible.</p></div>';
         }
         
         const mysteriesData = {
             vi: {
                 'Mầu Nhiệm Vui':{days:'Thứ 2, Thứ 7',color:'from-yellow-400 to-orange-500',items:['Thiên thần truyền tin cho Đức Bà chịu thai. Ta hãy xin cho được ở khiêm nhường.','Đức Bà đi viếng Bà Thánh Isave. Ta hãy xin cho được lòng yêu người.','Đức Bà sinh Đức Chúa Giêsu trong hang đá. Ta hãy xin cho được lòng khó khăn.','Đức Bà dâng Đức Chúa Giêsu trong đền Thánh. Ta hãy xin cho được vâng lời chịu lụy.','Đức Bà tìm được Đức Chúa Giêsu trong đền thành. Ta hãy xin cho được giữ nghĩa cùng Chúa luôn.']},
-                'Mầu Nhiệm Thương':{days:'Thứ 3, Thứ 6',color:'from-red-400 to-rose-500',items:['Đức Chúa Giêsu lo buồn đổ mồ hôi máu. Ta hãy xin cho được ăn năn tội nên.','Đức Chúa Giêsu chịu đánh đòn. Ta hãy xin cho được hãm mình chịu khó bằng lòng.','Đức Chúa Giêsu chịu đội mão gai. Ta hãy xin cho được chịu mọi sự sỉ nhục bằng lòng.','Đức Chúa Giêsu vác Thánh Giá. Ta hãy xin cho được vác Thánh Giá theo chân Chúa.','Đức Chúa Giêsu chịu chết trên cây Thánh Giá. Ta hãy xin đóng đanh tí tính xác thịt vào Thánh Giá Chúa.']},
+                'Mầu Nhiệm Thương':{days:'Thứ 3, Thứ 6',color:'from-red-400 to-rose-500',items:['Đức Chúa Giêsu lo buồn đổ mồ hôi máu. Ta hãy xin cho được ăn năn tội nên.','Đức Chúa Giêsu chịu đánh đòn. Ta hãy xin cho được hãm mình chịu khó bằng lòng.','Đức Chúa Giêsu chịu đội mão gai. Ta hãy xin cho được chịu mọi sự sỉ nhục bằng lòng.','Đức Chúa Giêsu vác Thánh Giá. Ta hãy xin cho được vác Thánh Giá theo chân Chúa.','Đức Chúa Giêsu chịu chết trên cây Thánh Giá. Ta hãy xin đóng đanh tí tình xác thịt vào Thánh Giá Chúa.']},
                 'Mầu Nhiệm Mừng':{days:'Thứ 4, Chủ Nhật',color:'from-amber-400 to-yellow-500',items:['Đức Chúa Giêsu sống lại. Ta hãy xin cho được sống lại thật về phần linh hồn.','Đức Chúa Giêsu lên trời. Ta hãy xin cho được ái mộ những sự trên trời.','Đức Chúa Thánh Thần hiện xuống. Ta hãy xin cho được lòng đầy dẫy mọi ơn Đức Chúa Thánh Thần.','Đức Chúa Trời cho Đức Bà lên trời. Ta hãy xin ơn chết lành trong tay Đức Mẹ.','Đức Chúa Trời thưởng Đức Mẹ trên trời. Ta hãy xin Đức Mẹ phù hộ cho ta được thưởng cùng Đức Mẹ trên nước thiên đàng.']},
                 'Mầu Nhiệm Sáng':{days:'Thứ 5',color:'from-blue-400 to-cyan-500',items:['Đức Chúa Giêsu chịu phép Rửa tại sông Giodan. Ta hãy xin cho được sống xứng đáng là con cái Chúa.','Đức Chúa Giêsu dự tiệc cưới Cana. Ta hãy xin cho được vững tin vào quyền năng của Ngài.','Đức Chúa Giêsu rao giảng Nước Trời. Ta hãy xin cho được hoán cải và đón nhận Tin Mừng.','Đức Chúa Giêsu biến hình trên núi. Ta hãy xin cho được lắng nghe và thực hành lời Chúa.','Đức Chúa Giêsu lập bí tích Thánh Thể. Ta hãy xin cho được năng kết hiệp cùng Chúa Giêsu Thánh Thể.']}
             },
@@ -304,11 +349,18 @@
                 share:'Chia sẻ', selectMystery:'Chọn Mầu Nhiệm:', view5Mysteries:'Xem 5 Sự',
                 history:'Lịch Sử:', quote:'"Lạy Mẹ Maria, xin cầu cho chúng con"', prayersTitle:'Các Kinh Nguyện',
                 decade:'Thập', copied:'Đã sao chép!', mysteryPrefix:'Mầu Nhiệm Thứ',
-                signCross:'Làm Dấu Thánh Giá và đọc', read:'Đọc', and:'và',
+                signCross:'Làm Dấu Thánh Giá và đọc', signCrossOnly:'Làm Dấu Thánh Giá', read:'Đọc', and:'và',
                 todayIs:'Hôm nay:', recommendedMystery:'Mầu nhiệm khuyến nghị:',
                 darkMode:'Chế độ tối', lightMode:'Chế độ sáng', language:'Ngôn ngữ',
                 textSize:'Cỡ chữ', prayersBtn:'Kinh nguyện', statsBtn:'Thống kê',
-                infoBtn:'Thông tin', shareBtn:'Chia sẻ'
+                infoBtn:'Thông tin', shareBtn:'Chia sẻ',
+                rosaryMode:'Mân Côi', divineMode:'Lòng Thương Xót',
+                divineMercyTitle:'Chuỗi Lòng Thương Xót Chúa',
+                divineCompleted:'Hoàn Thành Chuỗi Lòng Thương Xót!',
+                divineQuote:'"Lạy Chúa Giêsu, con tin cậy vào Chúa"',
+                normalTime:'Giờ Thường',
+                threePM:'3 Giờ Chiều',
+                kissTheCross:'Hôn Thánh Giá'
             },
             en: {
                 title:'Holy Rosary', total:'Total', days:'days', next:'Next', prev:'Back',
@@ -316,11 +368,18 @@
                 share:'Share', selectMystery:'Select Mystery:', view5Mysteries:'View 5 Mysteries',
                 history:'History:', quote:'"Holy Mary, Mother of God, pray for us"', prayersTitle:'Prayers',
                 decade:'Decade', copied:'Copied!', mysteryPrefix:'Mystery',
-                signCross:'Sign of the Cross and', read:'Pray', and:'and',
+                signCross:'Sign of the Cross and', signCrossOnly:'Sign of the Cross', read:'Pray', and:'and',
                 todayIs:'Today:', recommendedMystery:'Recommended Mystery:',
                 darkMode:'Dark mode', lightMode:'Light mode', language:'Language',
                 textSize:'Text size', prayersBtn:'Prayers', statsBtn:'Statistics',
-                infoBtn:'Information', shareBtn:'Share'
+                infoBtn:'Information', shareBtn:'Share',
+                rosaryMode:'Rosary', divineMode:'Divine Mercy',
+                divineMercyTitle:'Divine Mercy Chaplet',
+                divineCompleted:'Divine Mercy Completed!',
+                divineQuote:'"Jesus, I trust in You"',
+                normalTime:'Normal',
+                threePM:'3 O\'Clock',
+                kissTheCross:'Kiss the Cross'
             }
         };
 
@@ -365,14 +424,12 @@
             return mysteryMap[language][day];
         };
 
-        // Moon Icon SVG
         const MoonIcon = () => (
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
             </svg>
         );
 
-        // Sun Icon SVG
         const SunIcon = () => (
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <circle cx="12" cy="12" r="5"/>
@@ -388,6 +445,8 @@
         );
 
         function App(){
+            const [mode,setMode]=useState('rosary');
+            const [divineVariant,setDivineVariant]=useState('normal'); // 'normal' or '3pm'
             const [s,setS]=useState(0),[bc,setBc]=useState(0),[dec,setDec]=useState(0),
                   [showP,setShowP]=useState(false),[showM,setShowM]=useState(false),[showCredit,setShowCredit]=useState(false),
                   [hist,setHist]=useState([]),[darkMode,setDarkMode]=useState(true),[share,setShare]=useState(false),
@@ -416,6 +475,8 @@
                     setFontSize(d.fontSize||'medium');
                     setDarkMode(d.darkMode===undefined?true:d.darkMode);
                     setTimeStats(d.timeStats||{times:[],avgTime:0,totalTime:0});
+                    setMode(d.mode||'rosary');
+                    setDivineVariant(d.divineVariant||'normal');
                 }
             },[]);
             
@@ -433,15 +494,59 @@
             const mysteryKeys={'Mầu Nhiệm Vui':'Joyful Mysteries','Mầu Nhiệm Thương':'Sorrowful Mysteries','Mầu Nhiệm Mừng':'Glorious Mysteries','Mầu Nhiệm Sáng':'Luminous Mysteries'};
             const currentMysKey=lang==='vi'?mys:mysteryKeys[mys]||'Joyful Mysteries';
             
-            const steps=[
-                {i:lang==='vi'?t.ui.signCross+' '+t.prayers['Kinh Tin Kính'].split('.')[0]:t.ui.signCross+' '+Object.keys(t.prayers)[0],p:Object.keys(t.prayers)[0],c:1,e:'✝️'},
-                {i:t.ui.read+' '+Object.keys(t.prayers)[1],p:Object.keys(t.prayers)[1],c:1,e:'🙏'},
-                {i:t.ui.read+' 3 '+Object.keys(t.prayers)[2],p:Object.keys(t.prayers)[2],c:3,e:'📿'},
-                {i:t.ui.read+' '+Object.keys(t.prayers)[3],p:Object.keys(t.prayers)[3],c:1,e:'✨'}
-            ];
+            // Divine Mercy Step Logic - NORMAL (Giờ Thường)
+            const getDivineNormalStep=()=>{
+                if(s===0)return {i:t.ui.signCrossOnly,p:'',c:0,e:'✝️'};
+                if(s===1)return {i:t.ui.read+' '+Object.keys(t.prayers)[1],p:Object.keys(t.prayers)[1],c:1,e:'🙏'};
+                if(s===2)return {i:t.ui.read+' '+Object.keys(t.prayers)[2],p:Object.keys(t.prayers)[2],c:1,e:'📿'};
+                if(s===3)return {i:t.ui.read+' '+Object.keys(t.prayers)[0],p:Object.keys(t.prayers)[0],c:1,e:'✨'};
+                if(s>=4&&s<=13){
+                    const dIdx=Math.floor((s-4)/2);
+                    const isLarge=(s-4)%2===0;
+                    if(isLarge){
+                        return {i:(lang==='vi'?'Thập':'Decade')+' '+(dIdx+1)+': '+t.ui.read+' '+(lang==='vi'?'Kinh Hạt Lớn':'Large Bead'),p:lang==='vi'?'Kinh Hạt Lớn Lòng Thương Xót Chúa':'Large Bead Prayer Divine Mercy',c:1,e:'🌟'};
+                    }else{
+                        return {i:t.ui.read+' 10 '+(lang==='vi'?'Kinh Hạt Nhỏ':'Small Beads'),p:lang==='vi'?'Kinh Hạt Nhỏ Lòng Thương Xót Chúa':'Small Bead Prayer Divine Mercy',c:10,e:'📿'};
+                    }
+                }
+                if(s===14)return {i:t.ui.read+' 3 '+(lang==='vi'?'Lời Nguyện Kết':'Closing Prayers'),p:lang==='vi'?'Lời Nguyện Kết Lòng Thương Xót Chúa':'Closing Prayer Divine Mercy',c:3,e:'👑'};
+                if(s===15)return {i:t.ui.kissTheCross,p:'',c:0,e:'✝️'};
+                return {i:lang==='vi'?'Hoàn Thành!':'Complete!',p:'',c:0,e:'🎉'};
+            };
             
-            const getStep=()=>{
-                if(s<4)return steps[s];
+            // Divine Mercy Step Logic - 3 PM (3 Giờ Chiều)
+            const getDivine3PMStep=()=>{
+                if(s===0)return {i:t.ui.signCross,p:'',c:0,e:'✝️'};
+                if(s===1)return {i:t.ui.read+' '+(lang==='vi'?'Lời Nguyện 3 Giờ Chiều':'3 O\'Clock Prayer'),p:lang==='vi'?'Lời Nguyện 3 Giờ Chiều':'3 O\'Clock Prayer',c:1,e:'⏰'};
+                if(s===2)return {i:t.ui.read+' 3 '+(lang==='vi'?'Kinh Máu Và Nước':'Blood and Water Prayers'),p:lang==='vi'?'Kinh Máu Và Nước':'Blood and Water Prayer',c:3,e:'💧'};
+                if(s===3)return {i:t.ui.read+' '+Object.keys(t.prayers)[1],p:Object.keys(t.prayers)[1],c:1,e:'🙏'};
+                if(s===4)return {i:t.ui.read+' '+Object.keys(t.prayers)[2],p:Object.keys(t.prayers)[2],c:1,e:'📿'};
+                if(s===5)return {i:t.ui.read+' '+Object.keys(t.prayers)[0],p:Object.keys(t.prayers)[0],c:1,e:'✨'};
+                if(s>=6&&s<=15){
+                    const dIdx=Math.floor((s-6)/2);
+                    const isLarge=(s-6)%2===0;
+                    if(isLarge){
+                        return {i:(lang==='vi'?'Thập':'Decade')+' '+(dIdx+1)+': '+t.ui.read+' '+(lang==='vi'?'Kinh Hạt Lớn':'Large Bead'),p:lang==='vi'?'Kinh Hạt Lớn Lòng Thương Xót Chúa':'Large Bead Prayer Divine Mercy',c:1,e:'🌟'};
+                    }else{
+                        return {i:t.ui.read+' 10 '+(lang==='vi'?'Kinh Hạt Nhỏ':'Small Beads'),p:lang==='vi'?'Kinh Hạt Nhỏ Lòng Thương Xót Chúa':'Small Bead Prayer Divine Mercy',c:10,e:'📿'};
+                    }
+                }
+                if(s===16)return {i:t.ui.read+' 3 '+(lang==='vi'?'Lời Nguyện Kết':'Closing Prayers'),p:lang==='vi'?'Lời Nguyện Kết Lòng Thương Xót Chúa':'Closing Prayer Divine Mercy',c:3,e:'👑'};
+                if(s===17)return {i:t.ui.kissTheCross,p:'',c:0,e:'✝️'};
+                return {i:lang==='vi'?'Hoàn Thành!':'Complete!',p:'',c:0,e:'🎉'};
+            };
+            
+            // Rosary Step Logic
+            const getRosaryStep=()=>{
+                if(s<4){
+                    const steps=[
+                        {i:lang==='vi'?t.ui.signCross+' '+t.prayers['Kinh Tin Kính'].split('.')[0]:t.ui.signCross+' '+Object.keys(t.prayers)[0],p:Object.keys(t.prayers)[0],c:1,e:'✝️'},
+                        {i:t.ui.read+' '+Object.keys(t.prayers)[1],p:Object.keys(t.prayers)[1],c:1,e:'🙏'},
+                        {i:t.ui.read+' 3 '+Object.keys(t.prayers)[2],p:Object.keys(t.prayers)[2],c:3,e:'📿'},
+                        {i:t.ui.read+' '+Object.keys(t.prayers)[3],p:Object.keys(t.prayers)[3],c:1,e:'✨'}
+                    ];
+                    return steps[s];
+                }
                 if(s>=24)return s===24?{i:t.ui.read+' '+Object.keys(t.prayers)[4],p:Object.keys(t.prayers)[4],c:1,e:'👑'}:{i:lang==='vi'?'Làm Dấu Thánh Giá - Hoàn Thành!':'Sign of the Cross - Complete!',p:'',c:0,e:'✝️'};
                 const dIdx=Math.floor((s-4)/4),sInD=(s-4)%4;
                 const dSteps=[
@@ -453,15 +558,22 @@
                 return dSteps[sInD];
             };
 
-            const cur=getStep(),cm=M[currentMysKey],prog=(s/25)*100;
+            const getDivineStep=()=>{
+                return divineVariant==='normal'?getDivineNormalStep():getDivine3PMStep();
+            };
+
+            const cur = mode === 'divine' ? getDivineStep() : getRosaryStep();
+            const cm = mode === 'rosary' ? M[currentMysKey] : {color:'from-red-400 to-pink-500'};
+            const maxSteps = mode==='rosary'?26:(divineVariant==='normal'?16:18);
+            const prog = (s/maxSteps)*100;
             
             const [,setTick]=useState(0);
             useEffect(()=>{
-                if(startTime&&s>0&&s<26){
+                if(startTime&&s>0&&s<maxSteps){
                     const timer=setInterval(()=>setTick(t=>t+1),1000);
                     return()=>clearInterval(timer);
                 }
-            },[startTime,s]);
+            },[startTime,s,maxSteps]);
             const currentTime=startTime?(Date.now()-startTime)/1000:0;
             const formatTime=(seconds)=>{
                 const m=Math.floor(seconds/60);
@@ -487,11 +599,14 @@
             
             const next=(e)=>{
                 createRipple(e,nextBtnRef);
-                const cur=getStep();
                 if(cur.c===0||bc+1>=cur.c){
-                    if(s<25){
+                    if(s<maxSteps-1){
                         setS(s+1);setBc(0);
-                        if(s>=4&&s<24&&(s-4)%4===3)setDec(Math.floor((s-4)/4)+1);
+                        if(mode==='rosary'&&s>=4&&s<24&&(s-4)%4===3)setDec(Math.floor((s-4)/4)+1);
+                        if(mode==='divine'){
+                            if(divineVariant==='normal'&&s>=4&&s<=13&&(s-4)%2===1)setDec(Math.floor((s-4)/2)+1);
+                            if(divineVariant==='3pm'&&s>=6&&s<=15&&(s-6)%2===1)setDec(Math.floor((s-6)/2)+1);
+                        }
                     }else{
                         const prayerTime=startTime?(Date.now()-startTime)/1000:0;
                         const newTimes=[...timeStats.times,prayerTime].slice(-50);
@@ -499,10 +614,11 @@
                         const newAvg=newTotal/newTimes.length;
                         const newStats={times:newTimes,avgTime:newAvg,totalTime:timeStats.totalTime+prayerTime};
                         
-                        const sess={mystery:currentMysKey,date:new Date().toLocaleString(lang==='vi'?'vi-VN':'en-US'),completed:true,time:prayerTime};
+                        const mysteryName=mode==='rosary'?currentMysKey:(lang==='vi'?'Lòng Thương Xót':'Divine Mercy')+(divineVariant==='3pm'?' (3PM)':'');
+                        const sess={mystery:mysteryName,date:new Date().toLocaleString(lang==='vi'?'vi-VN':'en-US'),completed:true,time:prayerTime};
                         const newH=[sess,...hist.slice(0,9)],newT=total+1,newS=streak+1;
                         setHist(newH);setTotal(newT);setStreak(newS);setTimeStats(newStats);
-                        localStorage.setItem('rosaryData',JSON.stringify({history:newH,totalPrayers:newT,streak:newS,language:lang,fontSize:fontSize,darkMode:darkMode,timeStats:newStats}));
+                        localStorage.setItem('rosaryData',JSON.stringify({history:newH,totalPrayers:newT,streak:newS,language:lang,fontSize:fontSize,darkMode:darkMode,timeStats:newStats,mode:mode,divineVariant:divineVariant}));
                         setS(0);setBc(0);setDec(0);setStartTime(null);
                     }
                 }else{setBc(bc+1);}
@@ -513,18 +629,19 @@
                 if(bc>0){setBc(bc-1);}
                 else if(s>0){
                     setS(s-1);
-                    const prevStep=s===1?steps[0]:s<=4?steps[s-1]:s===4?steps[3]:(()=>{
-                        const dIdx=Math.floor((s-5)/4),sInD=(s-5)%4;
-                        return [{c:0},{c:1},{c:10},{c:1}][sInD<0?3:sInD];
-                    })();
-                    setBc(prevStep.c>0?prevStep.c-1:0);
-                    if(s>=5&&s<=24&&(s-5)%4===0)setDec(Math.floor((s-5)/4));
+                    const prevCur=mode==='divine'?getDivineStep():getRosaryStep();
+                    setBc(prevCur.c>0?prevCur.c-1:0);
+                    if(mode==='rosary'&&s>=5&&s<=24&&(s-5)%4===0)setDec(Math.floor((s-5)/4));
+                    if(mode==='divine'){
+                        if(divineVariant==='normal'&&s>=5&&s<=13&&(s-5)%2===0)setDec(Math.floor((s-5)/2));
+                        if(divineVariant==='3pm'&&s>=7&&s<=15&&(s-7)%2===0)setDec(Math.floor((s-7)/2));
+                    }
                 }
             };
             
             const shareText=()=>{
-                const txt=lang==='vi'?`🙏 Tôi vừa lần Mân Côi (${currentMysKey})!\n\n📊 Tổng: ${total} lần\n🔥 Chuỗi: ${streak} ngày\n\n#MânCôi`:`🙏 I just prayed the Rosary (${currentMysKey})!\n\n📊 Total: ${total} times\n🔥 Streak: ${streak} days\n\n#Rosary`;
-                if(navigator.share)navigator.share({title:lang==='vi'?'Mân Côi':'Holy Rosary',text:txt});
+                const txt=lang==='vi'?`🙏 Tôi vừa lần ${mode==='rosary'?'Mân Côi ('+currentMysKey+')':'Chuỗi Lòng Thương Xót'}!\n\n📊 Tổng: ${total} lần\n🔥 Chuỗi: ${streak} ngày\n\n#CầuNguyện`:`🙏 I just prayed the ${mode==='rosary'?'Rosary ('+currentMysKey+')':'Divine Mercy Chaplet'}!\n\n📊 Total: ${total} times\n🔥 Streak: ${streak} days\n\n#Prayer`;
+                if(navigator.share)navigator.share({title:lang==='vi'?'Cầu Nguyện':'Prayer',text:txt});
                 else{navigator.clipboard.writeText(txt);setShare(true);setTimeout(()=>setShare(false),2000);}
             };
             
@@ -553,6 +670,26 @@
                 if(saved){const d=JSON.parse(saved);d.fontSize=newSize;localStorage.setItem('rosaryData',JSON.stringify(d));}
             };
             
+            const switchMode=(newMode)=>{
+                if(s>0&&!window.confirm(lang==='vi'?'Bạn có chắc muốn chuyển đổi? Tiến trình hiện tại sẽ bị mất.':'Are you sure you want to switch? Current progress will be lost.')){
+                    return;
+                }
+                setMode(newMode);
+                setS(0);setBc(0);setDec(0);setStartTime(null);
+                const saved=localStorage.getItem('rosaryData');
+                if(saved){const d=JSON.parse(saved);d.mode=newMode;localStorage.setItem('rosaryData',JSON.stringify(d));}
+            };
+            
+            const switchDivineVariant=(variant)=>{
+                if(s>0&&!window.confirm(lang==='vi'?'Bạn có chắc muốn chuyển cách lần? Tiến trình hiện tại sẽ bị mất.':'Are you sure you want to switch? Current progress will be lost.')){
+                    return;
+                }
+                setDivineVariant(variant);
+                setS(0);setBc(0);setDec(0);setStartTime(null);
+                const saved=localStorage.getItem('rosaryData');
+                if(saved){const d=JSON.parse(saved);d.divineVariant=variant;localStorage.setItem('rosaryData',JSON.stringify(d));}
+            };
+            
             const getFontSizeClass=()=>{
                 const map={small:'font-size-small-indicator',medium:'font-size-medium-indicator',large:'font-size-large-indicator'};
                 return map[fontSize];
@@ -565,11 +702,33 @@
                             React.createElement('div',{className:'text-center'},
                                 React.createElement('div',{className:`text-xs ${darkMode?'text-purple-300':'text-purple-900'} font-medium mb-1`},'📅 '+t.ui.todayIs),
                                 React.createElement('div',{className:`text-sm ${darkMode?'text-white':'text-gray-900'} font-bold mb-1`},currentDate),
-                                React.createElement('div',{className:`text-sm ${darkMode?'text-yellow-300':'text-yellow-700'} font-semibold`},currentMysKey)
+                                mode==='rosary'&&React.createElement('div',{className:`text-sm ${darkMode?'text-yellow-300':'text-yellow-700'} font-semibold`},currentMysKey)
                             )
                         ),
                         
-                        s>0&&s<26&&startTime&&React.createElement('div',{className:`${darkMode?'bg-white/5 border-white/10':'bg-white/80 border-purple-200'} rounded-xl p-3 mb-4 border text-center`},
+                        React.createElement('div',{className:'mode-switch mb-4'},
+                            React.createElement('button',{
+                                className:`mode-switch-btn ${mode==='rosary'?'active':''} ${darkMode?'text-white':'text-gray-900'}`,
+                                onClick:()=>switchMode('rosary')
+                            },t.ui.rosaryMode),
+                            React.createElement('button',{
+                                className:`mode-switch-btn ${mode==='divine'?'active':''} ${darkMode?'text-white':'text-gray-900'}`,
+                                onClick:()=>switchMode('divine')
+                            },t.ui.divineMode)
+                        ),
+                        
+                        mode==='divine'&&React.createElement('div',{className:`divine-variant-switch ${darkMode?'':'bg-white/30'}`},
+                            React.createElement('button',{
+                                className:`divine-variant-btn ${divineVariant==='normal'?'active':''} ${darkMode?'text-white':'text-gray-900'}`,
+                                onClick:()=>switchDivineVariant('normal')
+                            },t.ui.normalTime),
+                            React.createElement('button',{
+                                className:`divine-variant-btn ${divineVariant==='3pm'?'active':''} ${darkMode?'text-white':'text-gray-900'}`,
+                                onClick:()=>switchDivineVariant('3pm')
+                            },t.ui.threePM)
+                        ),
+                        
+                        s>0&&s<maxSteps&&startTime&&React.createElement('div',{className:`${darkMode?'bg-white/5 border-white/10':'bg-white/80 border-purple-200'} rounded-xl p-3 mb-4 border text-center`},
                             React.createElement('div',{className:`text-xs ${darkMode?'text-purple-300':'text-purple-700'} mb-1`},lang==='vi'?'Thời gian':'Time'),
                             React.createElement('div',{className:`text-2xl font-bold ${darkMode?'text-white':'text-gray-900'} font-mono`},formatTime(currentTime))
                         ),
@@ -602,10 +761,11 @@
                         ),
                         
                         React.createElement('div',{className:'text-center mb-6'},
-                            React.createElement('div',{className:`inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br ${cm.color} rounded-full mb-4 shadow-lg ${s>0?'animate-pulse':''}`},'❤️'),
-                            React.createElement('h1',{className:`text-3xl font-bold ${darkMode?'text-white':'text-gray-900'} mb-2`},t.ui.title),
-                            React.createElement('p',{className:`${darkMode?'text-purple-300':'text-purple-700'} text-sm font-medium`},currentMysKey),
-                            React.createElement('p',{className:`${darkMode?'text-purple-400':'text-purple-600'} text-xs opacity-60`},cm.days)
+                            React.createElement('div',{className:`inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br ${cm.color} rounded-full mb-4 shadow-lg ${s>0?'animate-pulse':''}`},mode==='rosary'?'❤️':'✝️'),
+                            React.createElement('h1',{className:`text-3xl font-bold ${darkMode?'text-white':'text-gray-900'} mb-2`},mode==='rosary'?t.ui.title:t.ui.divineMercyTitle),
+                            mode==='rosary'&&React.createElement('p',{className:`${darkMode?'text-purple-300':'text-purple-700'} text-sm font-medium`},currentMysKey),
+                            mode==='rosary'&&React.createElement('p',{className:`${darkMode?'text-purple-400':'text-purple-600'} text-xs opacity-60`},cm.days),
+                            mode==='divine'&&React.createElement('p',{className:`${darkMode?'text-red-300':'text-red-700'} text-sm font-medium`},divineVariant==='normal'?t.ui.normalTime:t.ui.threePM)
                         ),
                         React.createElement('div',{className:`${darkMode?'bg-white/10':'bg-white/50'} rounded-full h-2 mb-6`},
                             React.createElement('div',{className:`bg-gradient-to-r ${cm.color} h-2 rounded-full transition-all duration-300`,style:{width:`${prog}%`}})
@@ -613,14 +773,14 @@
                         React.createElement('div',{className:`${darkMode?'bg-white/5':'bg-white/60'} rounded-2xl p-6 mb-6 border ${darkMode?'border-white/10':'border-purple-200'} prayer-container`},
                             React.createElement('div',{key:s,className:'prayer-content-scroll fade-slide'},
                                 React.createElement('div',{className:'text-center mb-4'},
-                                    cur.e==='🌟'&&React.createElement('div',{className:'text-6xl mb-2'},cur.e),
+                                    cur.e&&React.createElement('div',{className:'text-6xl mb-2'},cur.e),
                                     React.createElement('div',{className:`${darkMode?'text-white':'text-gray-900'} text-lg font-semibold mb-2`},cur.i),
                                     cur.c>1&&React.createElement('div',{className:`${darkMode?'text-purple-300':'text-purple-700'} text-3xl font-bold mb-3`},`${bc+1} / ${cur.c}`),
-                                    s===25&&React.createElement('div',{className:'text-yellow-400 font-bold text-xl animate-bounce mt-2'},`✨ ${t.ui.completed} ✨`)
+                                    s===maxSteps-1&&React.createElement('div',{className:'text-yellow-400 font-bold text-xl animate-bounce mt-2'},`✨ ${mode==='rosary'?t.ui.completed:t.ui.divineCompleted} ✨`)
                                 ),
                                 cur.p&&cur.p!=='mystery'&&React.createElement('div',{className:`${darkMode?'bg-white/5 border-white/10':'bg-white border-purple-200'} rounded-xl p-4 border`},
                                     React.createElement('p',{className:`${darkMode?'text-white/90':'text-gray-800'} leading-relaxed text-center prayer-text text-size-`+fontSize,style:{whiteSpace:'pre-line'}},
-                                        cur.p===Object.keys(P)[3]&&s>=4&&s<24&&(s-4)%4===3?P[cur.p]+'\n\n'+Object.keys(P)[5]+':\n'+P[Object.keys(P)[5]]:P[cur.p]
+                                        mode==='rosary'&&cur.p===Object.keys(P)[3]&&s>=4&&s<24&&(s-4)%4===3?P[cur.p]+'\n\n'+Object.keys(P)[5]+':\n'+P[Object.keys(P)[5]]:P[cur.p]
                                     )
                                 )
                             ),
@@ -635,14 +795,14 @@
                                 ),
                                 React.createElement('button',{ref:nextBtnRef,onClick:next,className:`nav-btn-glow btn-action bg-gradient-to-r ${cm.color} text-white font-medium py-4 rounded-xl shadow-md`},
                                     React.createElement('span',{className:'flex items-center justify-center gap-2'},
-                                        s===25?t.ui.complete:t.ui.next,
-                                        s<25&&React.createElement('svg',{viewBox:"0 0 24 24",fill:"none",stroke:"currentColor",strokeWidth:"3",strokeLinecap:"round",strokeLinejoin:"round",style:{width:'18px',height:'18px'}},
+                                        s===maxSteps-1?t.ui.complete:t.ui.next,
+                                        s<maxSteps-1&&React.createElement('svg',{viewBox:"0 0 24 24",fill:"none",stroke:"currentColor",strokeWidth:"3",strokeLinecap:"round",strokeLinejoin:"round",style:{width:'18px',height:'18px'}},
                                             React.createElement('polyline',{points:"9 18 15 12 9 6"})
                                         )
                                     )
                                 )
                             ),
-                            s>=4&&s<24&&React.createElement('div',{className:'flex items-center justify-center gap-2 mt-3'},
+                            s>=4&&React.createElement('div',{className:'flex items-center justify-center gap-2 mt-3'},
                                 React.createElement('div',{className:'flex gap-1'},[0,1,2,3,4].map(i=>React.createElement('div',{key:i,className:`w-3 h-3 rounded-full transition-all ${i<dec?`bg-gradient-to-br ${cm.color} shadow-lg`:darkMode?'bg-white/20':'bg-purple-300'}`}))),
                                 React.createElement('span',{className:`text-xs ${darkMode?'text-purple-300':'text-purple-700'}`},`${t.ui.decade} ${dec}/5`)
                             )
@@ -677,7 +837,7 @@
                                 React.createElement('span',{className:'action-btn-label'},t.ui.shareBtn)
                             )
                         ),
-                        React.createElement('div',{className:`${darkMode?'bg-white/5 border-white/10':'bg-white/60 border-purple-200'} rounded-xl p-4 border mb-4`},
+                        mode==='rosary'&&React.createElement('div',{className:`${darkMode?'bg-white/5 border-white/10':'bg-white/60 border-purple-200'} rounded-xl p-4 border mb-4`},
                             React.createElement('label',{className:`${darkMode?'text-purple-300':'text-purple-700'} text-xs mb-2 block`},t.ui.selectMystery),
                             React.createElement('select',{value:currentMysKey,onChange:e=>setMys(e.target.value),className:`w-full ${darkMode?'bg-white/10 border-white/20 text-white':'bg-white border-purple-300 text-gray-900'} border rounded-lg px-3 py-2 text-sm focus:outline-none transition-all`},
                                 Object.keys(M).map(m=>React.createElement('option',{key:m,value:m},`${m} - ${M[m].days}`))
@@ -694,7 +854,7 @@
                             )
                         ),
                         React.createElement('div',{className:'text-center'},
-                            React.createElement('p',{className:`${darkMode?'text-purple-400':'text-purple-600'} text-xs opacity-60`},t.ui.quote)
+                            React.createElement('p',{className:`${darkMode?'text-purple-400':'text-purple-600'} text-xs opacity-60`},mode==='rosary'?t.ui.quote:t.ui.divineQuote)
                         )
                     )
                 ),
@@ -714,7 +874,7 @@
                     )
                     )
                 ),
-                showM&&React.createElement('div',{className:'fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50',onClick:()=>setShowM(false)},
+                mode==='rosary'&&showM&&React.createElement('div',{className:'fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50',onClick:()=>setShowM(false)},
                     React.createElement('div',{className:`${darkMode?'bg-gradient-to-br from-slate-900 to-indigo-950':'bg-white'} rounded-3xl max-w-lg w-full max-h-[80vh] border ${darkMode?'border-purple-500/20':'border-gray-200'} shadow-2xl overflow-hidden flex flex-col`,onClick:e=>e.stopPropagation()},
                         React.createElement('div',{className:`sticky top-0 z-10 ${darkMode?'bg-slate-900/95':'bg-white/95'} backdrop-blur-lg border-b ${darkMode?'border-white/10':'border-gray-200'} px-6 py-4 flex justify-between items-center`},
                             React.createElement('h2',{className:`text-2xl font-bold ${darkMode?'text-white':'text-gray-900'}`},lang==='vi'?`5 Sự ${currentMysKey.replace('Mầu Nhiệm ','')}`:currentMysKey.replace(' Mysteries','')),
@@ -722,7 +882,7 @@
                         ),
                         React.createElement('div',{className:'flex-1 overflow-y-auto px-6 py-4'},
                             React.createElement('div',{className:'space-y-4'},
-                            cm.items.map((item,idx)=>React.createElement('div',{key:idx,className:`${darkMode?'bg-white/10 border-purple-500/20':'bg-gray-50 border-gray-200'} rounded-xl p-4 border`},
+                            cm.items&&cm.items.map((item,idx)=>React.createElement('div',{key:idx,className:`${darkMode?'bg-white/10 border-purple-500/20':'bg-gray-50 border-gray-200'} rounded-xl p-4 border`},
                                 React.createElement('p',{className:`${darkMode?'text-white/90':'text-gray-700'} text-sm leading-relaxed`},(lang==='vi'?'Thứ':'Mystery')+` ${idx+1}: ${item}`)
                             ))
                         )
@@ -738,9 +898,9 @@
                         React.createElement('div',{className:'flex-1 overflow-y-auto px-6 py-4'},
                         React.createElement('div',{className:`${darkMode?'bg-white/10 border-purple-500/20':'bg-gray-50 border-gray-200'} rounded-xl p-6 border text-center`},
                             React.createElement('div',{className:'text-6xl mb-4'},'❤️'),
-                            React.createElement('h3',{className:`text-xl font-semibold ${darkMode?'text-white':'text-gray-900'} mb-3`},lang==='vi'?'Cảm ơn mọi người':'Thank You'),
-                            React.createElement('p',{className:`${darkMode?'text-white/80':'text-gray-700'} text-sm leading-relaxed mb-4`},lang==='vi'?'Cảm ơn bạn đã sử dụng ứng dụng Mân Côi. Xin Đức Mẹ Maria luôn phù hộ và ban phước lành cho bạn và gia đình.':'Thank you for using the Holy Rosary app. May the Blessed Virgin Mary always protect and bless you and your family.'),
-                            React.createElement('div',{className:`${darkMode?'text-blue-300':'text-blue-600'} text-xs mt-4 pt-4 border-t ${darkMode?'border-white/20':'border-gray-200'}`},'Version 4.0 • Developer: Hứa Hoàng Thiện')
+                            React.createElement('h3',{className:`text-xl font-semibold ${darkMode?'text-white':'text-gray-900'} mb-3`},lang==='vi'?'Cảm Ơn mọi người':'Thank You'),
+                            React.createElement('p',{className:`${darkMode?'text-white/80':'text-gray-700'} text-sm leading-relaxed mb-4`},lang==='vi'?'Cảm ơn bạn đã sử dụng ứng dụng cầu nguyện. Xin Đức Mẹ Maria và Chúa Giêsu Lòng Thương Xót luôn phù hộ và ban phước lành cho bạn và gia đình.':'Thank you for using the prayer app. May the Blessed Virgin Mary and Jesus, the Divine Mercy, always protect and bless you and your family.'),
+                            React.createElement('div',{className:`${darkMode?'text-blue-300':'text-blue-600'} text-xs mt-4 pt-4 border-t ${darkMode?'border-white/20':'border-gray-200'}`},'Version 5.0 • Developer: Hứa Hoàng Thiện')
                         )
                     )
                     )
@@ -851,7 +1011,7 @@
             window.addEventListener('load',()=>{
                 navigator.serviceWorker.register('/service-worker.js')
                     .then(reg=>console.log('✅ SW registered:',reg.scope))
-                    .catch(err=>console.log('❌ SW registration failed:',err));
+                    .catch(err=>console.log('⚠ SW registration failed:',err));
             });
         }
         let deferredPrompt;
@@ -867,4 +1027,3 @@
     </script>
 </body>
 </html>
-
