@@ -491,47 +491,67 @@
             }, [lang]);
 
             const t=translations[lang], M=t.mysteries, P=t.prayers;
+            
+            // Divine Mercy Prayer Keys
+            const divineKeys = {
+                vi: {
+                    largeBead: 'Kinh Hạt Lớn Lòng Thương Xót Chúa',
+                    smallBead: 'Kinh Hạt Nhỏ Lòng Thương Xót Chúa',
+                    closing: 'Lời Nguyện Kết Lòng Thương Xót Chúa',
+                    threePM: 'Lời Nguyện 3 Giờ Chiều',
+                    bloodWater: 'Kinh Máu Và Nước'
+                },
+                en: {
+                    largeBead: 'Large Bead Prayer Divine Mercy',
+                    smallBead: 'Small Bead Prayer Divine Mercy',
+                    closing: 'Closing Prayer Divine Mercy',
+                    threePM: '3 O\'Clock Prayer',
+                    bloodWater: 'Blood and Water Prayer'
+                }
+            };
+            
+            const dk = divineKeys[lang];
             const mysteryKeys={'Mầu Nhiệm Vui':'Joyful Mysteries','Mầu Nhiệm Thương':'Sorrowful Mysteries','Mầu Nhiệm Mừng':'Glorious Mysteries','Mầu Nhiệm Sáng':'Luminous Mysteries'};
             const currentMysKey=lang==='vi'?mys:mysteryKeys[mys]||'Joyful Mysteries';
             
             // Divine Mercy Step Logic - NORMAL (Giờ Thường)
             const getDivineNormalStep=()=>{
                 if(s===0)return {i:t.ui.signCrossOnly,p:'',c:0,e:'✝️'};
-                if(s===1)return {i:t.ui.read+' '+Object.keys(t.prayers)[1],p:Object.keys(t.prayers)[1],c:1,e:'🙏'};
-                if(s===2)return {i:t.ui.read+' '+Object.keys(t.prayers)[2],p:Object.keys(t.prayers)[2],c:1,e:'📿'};
-                if(s===3)return {i:t.ui.read+' '+Object.keys(t.prayers)[0],p:Object.keys(t.prayers)[0],c:1,e:'✨'};
+                if(s===1)return {i:t.ui.read+' '+Object.keys(P)[1],p:Object.keys(P)[1],c:1,e:'🙏'};
+                if(s===2)return {i:t.ui.read+' '+Object.keys(P)[2],p:Object.keys(P)[2],c:1,e:'📿'};
+                if(s===3)return {i:t.ui.read+' '+Object.keys(P)[0],p:Object.keys(P)[0],c:1,e:'✨'};
                 if(s>=4&&s<=13){
                     const dIdx=Math.floor((s-4)/2);
                     const isLarge=(s-4)%2===0;
                     if(isLarge){
-                        return {i:(lang==='vi'?'Thập':'Decade')+' '+(dIdx+1)+': '+t.ui.read+' '+(lang==='vi'?'Kinh Hạt Lớn':'Large Bead'),p:lang==='vi'?'Kinh Hạt Lớn Lòng Thương Xót Chúa':'Large Bead Prayer Divine Mercy',c:1,e:'🌟'};
+                        return {i:(lang==='vi'?'Thập':'Decade')+' '+(dIdx+1)+': '+t.ui.read+' '+(lang==='vi'?'Kinh Hạt Lớn':'Large Bead'),p:dk.largeBead,c:1,e:'🌟'};
                     }else{
-                        return {i:t.ui.read+' 10 '+(lang==='vi'?'Kinh Hạt Nhỏ':'Small Beads'),p:lang==='vi'?'Kinh Hạt Nhỏ Lòng Thương Xót Chúa':'Small Bead Prayer Divine Mercy',c:10,e:'📿'};
+                        return {i:t.ui.read+' 10 '+(lang==='vi'?'Kinh Hạt Nhỏ':'Small Beads'),p:dk.smallBead,c:10,e:'📿'};
                     }
                 }
-                if(s===14)return {i:t.ui.read+' 3 '+(lang==='vi'?'Lời Nguyện Kết':'Closing Prayers'),p:lang==='vi'?'Lời Nguyện Kết Lòng Thương Xót Chúa':'Closing Prayer Divine Mercy',c:3,e:'👑'};
+                if(s===14)return {i:t.ui.read+' 3 '+(lang==='vi'?'Lời Nguyện Kết':'Closing Prayers'),p:dk.closing,c:3,e:'👑'};
                 if(s===15)return {i:t.ui.kissTheCross,p:'',c:0,e:'✝️'};
                 return {i:lang==='vi'?'Hoàn Thành!':'Complete!',p:'',c:0,e:'🎉'};
             };
             
             // Divine Mercy Step Logic - 3 PM (3 Giờ Chiều)
             const getDivine3PMStep=()=>{
-                if(s===0)return {i:t.ui.signCross,p:'',c:0,e:'✝️'};
-                if(s===1)return {i:t.ui.read+' '+(lang==='vi'?'Lời Nguyện 3 Giờ Chiều':'3 O\'Clock Prayer'),p:lang==='vi'?'Lời Nguyện 3 Giờ Chiều':'3 O\'Clock Prayer',c:1,e:'⏰'};
-                if(s===2)return {i:t.ui.read+' 3 '+(lang==='vi'?'Kinh Máu Và Nước':'Blood and Water Prayers'),p:lang==='vi'?'Kinh Máu Và Nước':'Blood and Water Prayer',c:3,e:'💧'};
-                if(s===3)return {i:t.ui.read+' '+Object.keys(t.prayers)[1],p:Object.keys(t.prayers)[1],c:1,e:'🙏'};
-                if(s===4)return {i:t.ui.read+' '+Object.keys(t.prayers)[2],p:Object.keys(t.prayers)[2],c:1,e:'📿'};
-                if(s===5)return {i:t.ui.read+' '+Object.keys(t.prayers)[0],p:Object.keys(t.prayers)[0],c:1,e:'✨'};
+                if(s===0)return {i:t.ui.signCrossOnly,p:'',c:0,e:'✝️'};
+                if(s===1)return {i:t.ui.read+' '+(lang==='vi'?'Lời Nguyện 3 Giờ Chiều':'3 O\'Clock Prayer'),p:dk.threePM,c:1,e:'⏰'};
+                if(s===2)return {i:t.ui.read+' 3 '+(lang==='vi'?'Kinh Máu Và Nước':'Blood and Water Prayers'),p:dk.bloodWater,c:3,e:'💧'};
+                if(s===3)return {i:t.ui.read+' '+Object.keys(P)[1],p:Object.keys(P)[1],c:1,e:'🙏'};
+                if(s===4)return {i:t.ui.read+' '+Object.keys(P)[2],p:Object.keys(P)[2],c:1,e:'📿'};
+                if(s===5)return {i:t.ui.read+' '+Object.keys(P)[0],p:Object.keys(P)[0],c:1,e:'✨'};
                 if(s>=6&&s<=15){
                     const dIdx=Math.floor((s-6)/2);
                     const isLarge=(s-6)%2===0;
                     if(isLarge){
-                        return {i:(lang==='vi'?'Thập':'Decade')+' '+(dIdx+1)+': '+t.ui.read+' '+(lang==='vi'?'Kinh Hạt Lớn':'Large Bead'),p:lang==='vi'?'Kinh Hạt Lớn Lòng Thương Xót Chúa':'Large Bead Prayer Divine Mercy',c:1,e:'🌟'};
+                        return {i:(lang==='vi'?'Thập':'Decade')+' '+(dIdx+1)+': '+t.ui.read+' '+(lang==='vi'?'Kinh Hạt Lớn':'Large Bead'),p:dk.largeBead,c:1,e:'🌟'};
                     }else{
-                        return {i:t.ui.read+' 10 '+(lang==='vi'?'Kinh Hạt Nhỏ':'Small Beads'),p:lang==='vi'?'Kinh Hạt Nhỏ Lòng Thương Xót Chúa':'Small Bead Prayer Divine Mercy',c:10,e:'📿'};
+                        return {i:t.ui.read+' 10 '+(lang==='vi'?'Kinh Hạt Nhỏ':'Small Beads'),p:dk.smallBead,c:10,e:'📿'};
                     }
                 }
-                if(s===16)return {i:t.ui.read+' 3 '+(lang==='vi'?'Lời Nguyện Kết':'Closing Prayers'),p:lang==='vi'?'Lời Nguyện Kết Lòng Thương Xót Chúa':'Closing Prayer Divine Mercy',c:3,e:'👑'};
+                if(s===16)return {i:t.ui.read+' 3 '+(lang==='vi'?'Lời Nguyện Kết':'Closing Prayers'),p:dk.closing,c:3,e:'👑'};
                 if(s===17)return {i:t.ui.kissTheCross,p:'',c:0,e:'✝️'};
                 return {i:lang==='vi'?'Hoàn Thành!':'Complete!',p:'',c:0,e:'🎉'};
             };
@@ -900,7 +920,7 @@
                             React.createElement('div',{className:'text-6xl mb-4'},'❤️'),
                             React.createElement('h3',{className:`text-xl font-semibold ${darkMode?'text-white':'text-gray-900'} mb-3`},lang==='vi'?'Cảm Ơn mọi người':'Thank You'),
                             React.createElement('p',{className:`${darkMode?'text-white/80':'text-gray-700'} text-sm leading-relaxed mb-4`},lang==='vi'?'Cảm ơn bạn đã sử dụng ứng dụng cầu nguyện. Xin Đức Mẹ Maria và Chúa Giêsu Lòng Thương Xót luôn phù hộ và ban phước lành cho bạn và gia đình.':'Thank you for using the prayer app. May the Blessed Virgin Mary and Jesus, the Divine Mercy, always protect and bless you and your family.'),
-                            React.createElement('div',{className:`${darkMode?'text-blue-300':'text-blue-600'} text-xs mt-4 pt-4 border-t ${darkMode?'border-white/20':'border-gray-200'}`},'Version 5.0 • Developer: Hứa Hoàng Thiện')
+                            React.createElement('div',{className:`${darkMode?'text-blue-300':'text-blue-600'} text-xs mt-4 pt-4 border-t ${darkMode?'border-white/20':'border-gray-200'}`},'Version 5.0 • Developer: Hòa Hoàng Thiện')
                         )
                     )
                     )
