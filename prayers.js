@@ -50,7 +50,7 @@ var prayersData = {
         'Closing Prayer Divine Mercy': 'Holy God, Holy Mighty One, Holy Immortal One, have mercy on us and on the whole world.',
         
         // ===== DIVINE MERCY CHAPLET - 3 O'CLOCK PRAYERS =====
-        '3 O\'Clock Prayer': 'You expired, O Jesus, but the source of life gushed forth for souls and an ocean of mercy opened up for the whole world. O Fount of Life, unfathomable Divine Mercy, envelop the whole world and empty Yourself out upon us.',
+        '3M Prayer': 'You expired, O Jesus, but the source of life gushed forth for souls and an ocean of mercy opened up for the whole world. O Fount of Life, unfathomable Divine Mercy, envelop the whole world and empty Yourself out upon us.',
         
         'Blood and Water Prayer': 'O Blood and Water, which gushed forth from the Heart of Jesus as a fount of mercy for us, I trust in You.'
     }
