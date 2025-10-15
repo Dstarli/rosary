@@ -11,7 +11,7 @@ var prayersData = {
         
         'Kinh Sáng Danh': 'Sáng danh Đức Chúa Cha, và Đức Chúa Con, và Đức Chúa Thánh Thần. Như đã có trước vô cùng, và bây giờ, và hằng có, và đời đời chẳng cùng. Amen.',
         
-        'Kinh Lạy Nữ Vương': 'Lạy Nữ Vương, Mẹ nhân lành, làm cho chúng con được sống, được vui, được cậy, thân lạy Mẹ. Chúng con là con cái Eva ở chốn khách đây này, kêu đến cùng Bà. Than van kêu khóc trong nơi khóc lóc khổ này. Ôi! Lạy Bà bầu chúng con, xin ghé mặt thương xem chúng con. Đến sau khỏi đây, xin cho chúng con được thấy Đức Chúa Giêsu, Con lòng Bà gồm phúc lạ. Ôi khoan thay! Nhân thay! Dịu thay! Thánh Maria trọn đời đồng trinh. Amen.',
+        'Kinh Lạy Nữ Vương': 'Lạy Nữ Vương, Mẹ nhân lành, làm cho chúng con được sống, được vui, được cậy, thân lạy Mẹ. Chúng con là con cái Eva ở chốn khách đầy này, kêu đến cùng Bà. Than van kêu khóc trong nơi khóc lóc khổ này. Ôi! Lạy Bà bầu chúng con, xin ghé mặt thương xem chúng con. Đến sau khỏi đây, xin cho chúng con được thấy Đức Chúa Giêsu, Con lòng Bà gồm phúc lạ. Ôi khoan thay! Nhân thay! Dịu thay! Thánh Maria trọn đời đồng trinh. Amen.',
         
         'Lời Nguyện Mân Côi': 'Lạy Chúa Giêsu, xin tha tội cho chúng con, xin cứu chúng con khỏi sa hỏa ngục, xin đem các linh hồn lên thiên đàng, nhất là những linh hồn cần đến lòng Chúa thương xót hơn. Amen.',
         
