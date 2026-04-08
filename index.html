@@ -772,8 +772,17 @@
                 }
             }
 
-            return React.createElement('div',{className:`min-h-screen font-sans ${darkMode?'app-dark':'app-light'} flex items-center justify-center p-4 transition-colors duration-1000`},
-                React.createElement('div',{className:'w-full max-w-md'},
+            return React.createElement('div',{className:`min-h-screen font-sans ${darkMode?'app-dark':'app-light'} flex items-center justify-center p-4 transition-colors duration-1000 relative overflow-hidden`},
+                currentImage && React.createElement('div', {
+                    className: 'absolute inset-0 z-0 pointer-events-none transition-opacity duration-[2s] ease-in-out',
+                },
+                    React.createElement('img', {
+                        src: currentImage,
+                        className: `w-full h-full object-cover opacity-${darkMode?'20':'15'} blur-[60px] transform scale-110`
+                    }),
+                    darkMode && React.createElement('div', {className: 'absolute inset-0 bg-slate-950/60'})
+                ),
+                React.createElement('div',{className:'w-full max-w-md z-10 relative'},
                     React.createElement('div',{className:`${darkMode?'card-dark':'card-light'} backdrop-blur-xl rounded-3xl shadow-2xl p-8 border transition-all duration-700`},
                         React.createElement('div',{className:`date-banner rounded-2xl p-4 mb-4 fade-in`},
                             React.createElement('div',{className:'text-center'},
@@ -837,10 +846,19 @@
                             )
                         ),
                         
+                        currentImage && React.createElement('div', {className: 'relative w-full aspect-video rounded-3xl overflow-hidden shadow-2xl mb-8 fade-in group ring-1 ring-white/20'},
+                            React.createElement('img',{src:currentImage, className:`w-full h-full object-cover transition-transform duration-[3s] ease-out group-hover:scale-110`}),
+                            React.createElement('div',{className:'absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent'}),
+                            React.createElement('div',{className:'absolute bottom-4 left-5 right-5 flex justify-between items-end'},
+                                React.createElement('div', null,
+                                    React.createElement('p',{className:'text-yellow-400 font-bold text-xs uppercase tracking-widest mb-1 shadow-black'}, (lang==='vi'?'Mầu Nhiệm':'Mystery') + ` ${dec}`),
+                                    React.createElement('h3',{className:'text-white font-serif text-xl font-medium leading-tight shadow-black'}, cm.items[dec-1])
+                                )
+                            )
+                        ),
+                        
                         React.createElement('div',{className:'text-center mb-6'},
-                            currentImage ?
-                                React.createElement('img',{src:currentImage, className:`mx-auto w-24 h-24 object-cover rounded-2xl shadow-[0_4px_25px_rgba(255,255,255,0.2)] mb-4 ${s>0?'fade-in':''}`, style:{boxShadow: darkMode ? '0 0 25px rgba(255,255,255,0.15)' : '0 10px 25px rgba(0,0,0,0.1)'}}) :
-                                React.createElement('div',{className:`inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br ${cm.color} rounded-full mb-4 shadow-lg ${s>0?'animate-pulse':''}`},mode==='rosary'?'❤️':'✝️'),
+                            !currentImage && React.createElement('div',{className:`inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br ${cm.color} rounded-full mb-4 shadow-lg ${s>0?'animate-pulse':''}`},mode==='rosary'?'❤️':'✝️'),
                             React.createElement('h1',{className:`text-3xl font-bold ${darkMode?'text-white':'text-gray-900'} mb-2`},mode==='rosary'?t.ui.title:t.ui.divineMercyTitle),
                             mode==='rosary'&&React.createElement('p',{className:`${darkMode?'text-purple-300':'text-purple-700'} text-sm font-medium`},currentMysKey),
                             mode==='rosary'&&React.createElement('p',{className:`${darkMode?'text-purple-400':'text-purple-600'} text-xs opacity-60`},cm.days),
