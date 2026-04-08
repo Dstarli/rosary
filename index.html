@@ -9,6 +9,19 @@
     <link rel="apple-touch-icon" href="icon-192.png">
     <meta name="description" content="Ứng dụng hỗ trợ cầu nguyện Mân Côi và Chuỗi Lòng Thương Xót">
     <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Lora:ital,wght@0,400;0,500;0,600;1,400;1,500&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        serif: ['Lora', 'serif'],
+                    }
+                }
+            }
+        }
+    </script>
     <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
@@ -47,12 +60,27 @@
         .ripple-effect{position:absolute;border-radius:50%;background:rgba(255,255,255,0.5);pointer-events:none;animation:ripple 0.6s ease-out}
         
         .app-light{
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            color: #1e293b;
+        }
+        .app-light::before{
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle at 30% 50%, rgba(251, 191, 36, 0.15) 0%, transparent 50%),
+                        radial-gradient(circle at 70% 80%, rgba(250, 204, 21, 0.1) 0%, transparent 50%),
+                        radial-gradient(circle at 50% 20%, rgba(245, 158, 11, 0.05) 0%, transparent 50%);
+            animation: glowMove 25s ease-in-out infinite;
+            pointer-events: none;
         }
         .app-dark{
-            background: linear-gradient(135deg, #334155 0%, #6b21a8 50%, #0f172a 100%);
+            background: linear-gradient(135deg, #020617 0%, #0f172a 50%, #09090b 100%);
             position: relative;
             overflow: hidden;
+            color: #f8fafc;
         }
         
         .app-dark::before{
@@ -76,18 +104,24 @@
         }
         
         .card-light{
-            background: rgba(255, 255, 255, 0.95);
-            border-color: rgba(255, 255, 255, 0.3);
+            background: rgba(255, 255, 255, 0.85);
+            border-color: rgba(255, 255, 255, 0.6);
+            box-shadow: 0 10px 40px -10px rgba(0,0,0,0.08);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
         }
         .card-dark{
-            background: rgba(30, 20, 60, 0.75);
-            border-color: rgba(139, 92, 246, 0.2);
+            background: rgba(15, 23, 42, 0.75);
+            border-color: rgba(255, 255, 255, 0.08);
+            box-shadow: 0 10px 40px -10px rgba(0,0,0,0.5);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
         }
         
         .date-banner{
-            background: linear-gradient(135deg, rgba(139, 92, 246, 0.2), rgba(99, 102, 241, 0.1));
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(139, 92, 246, 0.3);
+            background: linear-gradient(135deg, rgba(255,255,255,0.1), rgba(255,255,255,0.05));
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255,255,255,0.1);
         }
         
         .icon-btn{
@@ -720,7 +754,25 @@
                 return map[fontSize];
             };
 
-            return React.createElement('div',{className:`min-h-screen ${darkMode?'app-dark':'app-light'} flex items-center justify-center p-4 transition-all duration-700`},
+            let currentImage = null;
+            if (mode === 'rosary' && s >= 4 && s < 24) {
+                const dIdx = Math.floor((s-4)/4) + 1; // 1 to 5
+                let prefix = '';
+                if (currentMysKey.includes('Vui') || currentMysKey.includes('Joyful')) prefix = 'joyful';
+                else if (currentMysKey.includes('Thương') || currentMysKey.includes('Sorrowful')) prefix = 'sorrowful';
+                else if (currentMysKey.includes('Mừng') || currentMysKey.includes('Glorious')) prefix = 'glorious';
+                else if (currentMysKey.includes('Sáng') || currentMysKey.includes('Luminous')) prefix = 'luminous';
+                
+                if (prefix) {
+                    if (prefix === 'luminous' && dIdx > 2) {
+                        currentImage = null; 
+                    } else {
+                        currentImage = `./assets/${prefix}_${dIdx}.png`;
+                    }
+                }
+            }
+
+            return React.createElement('div',{className:`min-h-screen font-sans ${darkMode?'app-dark':'app-light'} flex items-center justify-center p-4 transition-colors duration-1000`},
                 React.createElement('div',{className:'w-full max-w-md'},
                     React.createElement('div',{className:`${darkMode?'card-dark':'card-light'} backdrop-blur-xl rounded-3xl shadow-2xl p-8 border transition-all duration-700`},
                         React.createElement('div',{className:`date-banner rounded-2xl p-4 mb-4 fade-in`},
@@ -786,31 +838,33 @@
                         ),
                         
                         React.createElement('div',{className:'text-center mb-6'},
-                            React.createElement('div',{className:`inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br ${cm.color} rounded-full mb-4 shadow-lg ${s>0?'animate-pulse':''}`},mode==='rosary'?'❤️':'✝️'),
+                            currentImage ?
+                                React.createElement('img',{src:currentImage, className:`mx-auto w-24 h-24 object-cover rounded-2xl shadow-[0_4px_25px_rgba(255,255,255,0.2)] mb-4 ${s>0?'fade-in':''}`, style:{boxShadow: darkMode ? '0 0 25px rgba(255,255,255,0.15)' : '0 10px 25px rgba(0,0,0,0.1)'}}) :
+                                React.createElement('div',{className:`inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br ${cm.color} rounded-full mb-4 shadow-lg ${s>0?'animate-pulse':''}`},mode==='rosary'?'❤️':'✝️'),
                             React.createElement('h1',{className:`text-3xl font-bold ${darkMode?'text-white':'text-gray-900'} mb-2`},mode==='rosary'?t.ui.title:t.ui.divineMercyTitle),
                             mode==='rosary'&&React.createElement('p',{className:`${darkMode?'text-purple-300':'text-purple-700'} text-sm font-medium`},currentMysKey),
                             mode==='rosary'&&React.createElement('p',{className:`${darkMode?'text-purple-400':'text-purple-600'} text-xs opacity-60`},cm.days),
                             mode==='divine'&&React.createElement('p',{className:`${darkMode?'text-red-300':'text-red-700'} text-sm font-medium`},divineVariant==='normal'?t.ui.normalTime:t.ui.threePM)
                         ),
                         React.createElement('div',{className:`${darkMode?'bg-white/10':'bg-white/50'} rounded-full h-2 mb-6`},
-                            React.createElement('div',{className:`bg-gradient-to-r ${cm.color} h-2 rounded-full transition-all duration-300`,style:{width:`${prog}%`}})
+                            React.createElement('div',{className:`bg-gradient-to-r ${cm.color} h-2 rounded-full transition-all duration-700 ease-out`,style:{width:`${prog}%`, boxShadow: darkMode ? '0 0 10px ' + (cm.color.includes('blue')?'#60a5fa':cm.color.includes('amber')?'#fbbf24':cm.color.includes('red')?'#f87171':'#38bdf8') : 'none'}})
                         ),
-                        React.createElement('div',{className:`${darkMode?'bg-white/5':'bg-white/60'} rounded-2xl p-6 mb-6 border ${darkMode?'border-white/10':'border-purple-200'} prayer-container`},
+                        React.createElement('div',{className:`${darkMode?'bg-slate-900/40 border-slate-700':'bg-white/80 border-slate-200'} shadow-inner rounded-3xl p-6 mb-6 border prayer-container`},
                             React.createElement('div',{key:s,className:'prayer-content-scroll fade-slide'},
                                 React.createElement('div',{className:'text-center mb-4'},
                                     cur.e&&React.createElement('div',{className:'text-6xl mb-2'},cur.e),
-                                    React.createElement('div',{className:`${darkMode?'text-white':'text-gray-900'} text-lg font-semibold mb-2`},cur.i),
+                                    React.createElement('div',{className:`${darkMode?'text-white':'text-gray-900'} text-xl font-medium mb-3`},cur.i),
                                     cur.c>1&&React.createElement('div',{className:`${darkMode?'text-purple-300':'text-purple-700'} text-3xl font-bold mb-3`},`${bc+1} / ${cur.c}`),
                                     s===maxSteps-1&&React.createElement('div',{className:'text-yellow-400 font-bold text-xl animate-bounce mt-2'},`✨ ${mode==='rosary'?t.ui.completed:t.ui.divineCompleted} ✨`)
                                 ),
                                 cur.p&&cur.p!=='mystery'&&React.createElement('div',{className:`${darkMode?'bg-white/5 border-white/10':'bg-white border-purple-200'} rounded-xl p-4 border`},
-                                    React.createElement('p',{className:`${darkMode?'text-white/90':'text-gray-800'} leading-relaxed text-center prayer-text text-size-`+fontSize,style:{whiteSpace:'pre-line'}},
+                                    React.createElement('p',{className:`${darkMode?'text-white/95':'text-gray-900'} leading-relaxed font-serif text-center prayer-text text-size-`+fontSize,style:{whiteSpace:'pre-line'}},
                                         mode==='rosary'&&cur.p===Object.keys(P)[3]&&s>=4&&s<24&&(s-4)%4===3?P[cur.p]+'\n\n'+Object.keys(P)[5]+':\n'+P[Object.keys(P)[5]]:P[cur.p]
                                     )
                                 )
                             ),
                             React.createElement('div',{className:'grid grid-cols-2 gap-3'},
-                                React.createElement('button',{ref:prevBtnRef,onClick:prev,disabled:s===0&&bc===0,className:`nav-btn-glow btn-action ${s===0&&bc===0?'opacity-40 cursor-not-allowed':''}  bg-gradient-to-r from-indigo-500 to-purple-500 text-white font-medium py-4 rounded-xl shadow-md`},
+                                React.createElement('button',{ref:prevBtnRef,onClick:prev,disabled:s===0&&bc===0,className:`nav-btn-glow btn-action ${s===0&&bc===0?'opacity-40 cursor-not-allowed':''}  bg-gradient-to-r ${darkMode?'from-slate-700 to-slate-600 border-slate-500':'from-slate-300 to-slate-200 border-slate-300 text-slate-800'} ${darkMode?'text-white':'text-slate-700'} font-semibold py-4 rounded-2xl shadow-md border`},
                                     React.createElement('span',{className:'flex items-center justify-center gap-2'},
                                         React.createElement('svg',{viewBox:"0 0 24 24",fill:"none",stroke:"currentColor",strokeWidth:"3",strokeLinecap:"round",strokeLinejoin:"round",style:{width:'18px',height:'18px'}},
                                             React.createElement('polyline',{points:"15 18 9 12 15 6"})
@@ -818,7 +872,7 @@
                                         t.ui.prev
                                     )
                                 ),
-                                React.createElement('button',{ref:nextBtnRef,onClick:next,className:`nav-btn-glow btn-action bg-gradient-to-r ${cm.color} text-white font-medium py-4 rounded-xl shadow-md`},
+                                React.createElement('button',{ref:nextBtnRef,onClick:next,className:`nav-btn-glow btn-action bg-gradient-to-r ${cm.color} text-white font-semibold py-4 rounded-2xl shadow-xl border border-white/20`},
                                     React.createElement('span',{className:'flex items-center justify-center gap-2'},
                                         s===maxSteps-1?t.ui.complete:t.ui.next,
                                         s<maxSteps-1&&React.createElement('svg',{viewBox:"0 0 24 24",fill:"none",stroke:"currentColor",strokeWidth:"3",strokeLinecap:"round",strokeLinejoin:"round",style:{width:'18px',height:'18px'}},
@@ -835,34 +889,34 @@
                         React.createElement('div',{className:'action-btn-grid mb-6'},
                             React.createElement('button',{
                                 onClick:()=>setShowP(!showP),
-                                className:`action-btn ${darkMode?'bg-white/10 border-purple-500/30 hover:bg-white/15 text-purple-300':'bg-gradient-to-br from-blue-50 to-indigo-100 border-blue-200 hover:from-blue-100 hover:to-indigo-200 text-blue-700'} border`
+                                className:`action-btn ${darkMode?'bg-slate-800/60 border-slate-700 hover:bg-slate-700/80 text-blue-300':'bg-white/80 border-slate-200 hover:bg-white text-blue-700'} border shadow-sm`
                             },
                                 React.createElement('span',{className:'action-btn-icon'},'📖'),
                                 React.createElement('span',{className:'action-btn-label'},t.ui.prayersBtn)
                             ),
                             React.createElement('button',{
                                 onClick:()=>setShowStats(true),
-                                className:`action-btn ${darkMode?'bg-white/10 border-purple-500/30 hover:bg-white/15 text-purple-300':'bg-gradient-to-br from-green-50 to-emerald-100 border-green-200 hover:from-green-100 hover:to-emerald-200 text-green-700'} border`
+                                className:`action-btn ${darkMode?'bg-slate-800/60 border-slate-700 hover:bg-slate-700/80 text-emerald-300':'bg-white/80 border-slate-200 hover:bg-white text-emerald-700'} border shadow-sm`
                             },
                                 React.createElement('span',{className:'action-btn-icon'},'📊'),
                                 React.createElement('span',{className:'action-btn-label'},t.ui.statsBtn)
                             ),
                             React.createElement('button',{
                                 onClick:()=>setShowCredit(true),
-                                className:`action-btn ${darkMode?'bg-white/10 border-purple-500/30 hover:bg-white/15 text-purple-300':'bg-gradient-to-br from-purple-50 to-pink-100 border-purple-200 hover:from-purple-100 hover:to-pink-200 text-purple-700'} border`
+                                className:`action-btn ${darkMode?'bg-slate-800/60 border-slate-700 hover:bg-slate-700/80 text-purple-300':'bg-white/80 border-slate-200 hover:bg-white text-purple-700'} border shadow-sm`
                             },
                                 React.createElement('span',{className:'action-btn-icon'},'ℹ️'),
                                 React.createElement('span',{className:'action-btn-label'},t.ui.infoBtn)
                             ),
                             React.createElement('button',{
                                 onClick:shareText,
-                                className:`action-btn ${darkMode?'bg-white/10 border-purple-500/30 hover:bg-white/15 text-purple-300':'bg-gradient-to-br from-orange-50 to-red-100 border-orange-200 hover:from-orange-100 hover:to-red-200 text-orange-700'} border`
+                                className:`action-btn ${darkMode?'bg-slate-800/60 border-slate-700 hover:bg-slate-700/80 text-orange-300':'bg-white/80 border-slate-200 hover:bg-white text-orange-700'} border shadow-sm`
                             },
                                 React.createElement('span',{className:'action-btn-icon'},'🔗'),
                                 React.createElement('span',{className:'action-btn-label'},t.ui.shareBtn)
                             )
                         ),
-                        mode==='rosary'&&React.createElement('div',{className:`${darkMode?'bg-white/5 border-white/10':'bg-white/60 border-purple-200'} rounded-xl p-4 border mb-4`},
+                        mode==='rosary'&&React.createElement('div',{className:`${darkMode?'bg-white/5 border-white/10':'bg-white/60 border-slate-200'} rounded-xl p-4 border mb-4`},
                             React.createElement('label',{className:`${darkMode?'text-purple-300':'text-purple-700'} text-xs mb-2 block`},t.ui.selectMystery),
                             React.createElement('select',{value:currentMysKey,onChange:e=>setMys(e.target.value),className:`w-full ${darkMode?'bg-white/10 border-white/20 text-white':'bg-white border-purple-300 text-gray-900'} border rounded-lg px-3 py-2 text-sm focus:outline-none transition-all`},
                                 Object.keys(M).map(m=>React.createElement('option',{key:m,value:m},`${m} - ${M[m].days}`))
@@ -884,7 +938,7 @@
                     )
                 ),
                 showP&&React.createElement('div',{className:'fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50',onClick:()=>setShowP(false)},
-                    React.createElement('div',{className:`${darkMode?'bg-gradient-to-br from-slate-900 to-indigo-950':'bg-white'} rounded-3xl max-w-lg w-full max-h-[80vh] border ${darkMode?'border-purple-500/20':'border-gray-200'} shadow-2xl overflow-hidden flex flex-col`,onClick:e=>e.stopPropagation()},
+                    React.createElement('div',{className:`${darkMode?'bg-gradient-to-br from-slate-950 to-slate-900':'bg-white/95 backdrop-blur-3xl'} rounded-[2rem] max-w-lg w-full max-h-[80vh] border ${darkMode?'border-slate-800':'border-white'} shadow-2xl overflow-hidden flex flex-col`,onClick:e=>e.stopPropagation()},
                         React.createElement('div',{className:`sticky top-0 z-10 ${darkMode?'bg-slate-900/95':'bg-white/95'} backdrop-blur-lg border-b ${darkMode?'border-white/10':'border-gray-200'} px-6 py-4 flex justify-between items-center`},
                             React.createElement('h2',{className:`text-2xl font-bold ${darkMode?'text-white':'text-gray-900'}`},t.ui.prayersTitle),
                             React.createElement('button',{onClick:()=>setShowP(false),className:`${darkMode?'text-white/70 hover:text-white':'text-gray-600 hover:text-gray-900'} text-2xl font-bold transition-colors`},'×')
@@ -893,14 +947,14 @@
                             React.createElement('div',{className:'space-y-6'},
                             Object.entries(P).map(([title,prayer])=>React.createElement('div',{key:title,className:`${darkMode?'bg-white/10 border-purple-500/20':'bg-gray-50 border-gray-200'} rounded-xl p-4 border`},
                                 React.createElement('h3',{className:`text-lg font-semibold ${darkMode?'text-yellow-300':'text-blue-600'} mb-2`},title),
-                                React.createElement('p',{className:`${darkMode?'text-white/90':'text-gray-700'} text-sm leading-relaxed`},prayer)
+                                React.createElement('p',{className:`${darkMode?'text-white/90':'text-gray-700'} text-sm leading-relaxed font-serif`},prayer)
                             ))
                         )
                     )
                     )
                 ),
                 mode==='rosary'&&showM&&React.createElement('div',{className:'fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50',onClick:()=>setShowM(false)},
-                    React.createElement('div',{className:`${darkMode?'bg-gradient-to-br from-slate-900 to-indigo-950':'bg-white'} rounded-3xl max-w-lg w-full max-h-[80vh] border ${darkMode?'border-purple-500/20':'border-gray-200'} shadow-2xl overflow-hidden flex flex-col`,onClick:e=>e.stopPropagation()},
+                    React.createElement('div',{className:`${darkMode?'bg-gradient-to-br from-slate-950 to-slate-900':'bg-white/95 backdrop-blur-3xl'} rounded-[2rem] max-w-lg w-full max-h-[80vh] border ${darkMode?'border-slate-800':'border-white'} shadow-2xl overflow-hidden flex flex-col`,onClick:e=>e.stopPropagation()},
                         React.createElement('div',{className:`sticky top-0 z-10 ${darkMode?'bg-slate-900/95':'bg-white/95'} backdrop-blur-lg border-b ${darkMode?'border-white/10':'border-gray-200'} px-6 py-4 flex justify-between items-center`},
                             React.createElement('h2',{className:`text-2xl font-bold ${darkMode?'text-white':'text-gray-900'}`},lang==='vi'?`5 Sự ${currentMysKey.replace('Mầu Nhiệm ','')}`:currentMysKey.replace(' Mysteries','')),
                             React.createElement('button',{onClick:()=>setShowM(false),className:`${darkMode?'text-white/70 hover:text-white':'text-gray-600 hover:text-gray-900'} text-2xl font-bold transition-colors`},'×')
@@ -908,14 +962,14 @@
                         React.createElement('div',{className:'flex-1 overflow-y-auto px-6 py-4'},
                             React.createElement('div',{className:'space-y-4'},
                             cm.items&&cm.items.map((item,idx)=>React.createElement('div',{key:idx,className:`${darkMode?'bg-white/10 border-purple-500/20':'bg-gray-50 border-gray-200'} rounded-xl p-4 border`},
-                                React.createElement('p',{className:`${darkMode?'text-white/90':'text-gray-700'} text-sm leading-relaxed`},(lang==='vi'?'Thứ':'Mystery')+` ${idx+1}: ${item}`)
+                                React.createElement('p',{className:`${darkMode?'text-white/90':'text-gray-700'} text-sm leading-relaxed font-serif`},(lang==='vi'?'Thứ':'Mystery')+` ${idx+1}: ${item}`)
                             ))
                         )
                     )
                     )
                 ),
                 showCredit&&React.createElement('div',{className:'fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50',onClick:()=>setShowCredit(false)},
-                    React.createElement('div',{className:`${darkMode?'bg-gradient-to-br from-slate-900 to-indigo-950':'bg-white'} rounded-3xl max-w-lg w-full max-h-[80vh] border ${darkMode?'border-purple-500/20':'border-gray-200'} shadow-2xl overflow-hidden flex flex-col`,onClick:e=>e.stopPropagation()},
+                    React.createElement('div',{className:`${darkMode?'bg-gradient-to-br from-slate-950 to-slate-900':'bg-white/95 backdrop-blur-3xl'} rounded-[2rem] max-w-lg w-full max-h-[80vh] border ${darkMode?'border-slate-800':'border-white'} shadow-2xl overflow-hidden flex flex-col`,onClick:e=>e.stopPropagation()},
                         React.createElement('div',{className:`sticky top-0 z-10 ${darkMode?'bg-slate-900/95':'bg-white/95'} backdrop-blur-lg border-b ${darkMode?'border-white/10':'border-gray-200'} px-6 py-4 flex justify-between items-center`},
                             React.createElement('h2',{className:`text-2xl font-bold ${darkMode?'text-white':'text-gray-900'}`},lang==='vi'?'Thông Tin':'Information'),
                             React.createElement('button',{onClick:()=>setShowCredit(false),className:`${darkMode?'text-white/70 hover:text-white':'text-gray-600 hover:text-gray-900'} text-2xl font-bold transition-colors`},'×')
@@ -931,7 +985,7 @@
                     )
                 ),
                 showStats&&React.createElement('div',{className:'fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50',onClick:()=>setShowStats(false)},
-                    React.createElement('div',{className:`${darkMode?'bg-gradient-to-br from-slate-900 to-indigo-950':'bg-white'} rounded-3xl max-w-lg w-full max-h-[85vh] border ${darkMode?'border-purple-500/20':'border-gray-200'} shadow-2xl overflow-hidden flex flex-col`,onClick:e=>e.stopPropagation()},
+                    React.createElement('div',{className:`${darkMode?'bg-gradient-to-br from-slate-950 to-slate-900':'bg-white/95 backdrop-blur-3xl'} rounded-[2rem] max-w-lg w-full max-h-[85vh] border ${darkMode?'border-slate-800':'border-white'} shadow-2xl overflow-hidden flex flex-col`,onClick:e=>e.stopPropagation()},
                         React.createElement('div',{className:`sticky top-0 z-10 ${darkMode?'bg-slate-900/95':'bg-white/95'} backdrop-blur-lg border-b ${darkMode?'border-white/10':'border-gray-200'} px-6 py-4 flex justify-between items-center`},
                             React.createElement('h2',{className:`text-2xl font-bold ${darkMode?'text-white':'text-gray-900'} flex items-center gap-2`},
                                 '🏆',

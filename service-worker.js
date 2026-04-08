@@ -1,7 +1,7 @@
 // ========== SERVICE WORKER v3.0 (FIXED) ==========
 
-const CACHE_NAME = 'rosary-app-v3.0';
-const DYNAMIC_CACHE = 'rosary-dynamic-v3.0';
+const CACHE_NAME = 'rosary-app-v4.0';
+const DYNAMIC_CACHE = 'rosary-dynamic-v4.0';
 
 // ✅ CRITICAL: Include ALL resources needed for offline functionality
 const STATIC_ASSETS = [
