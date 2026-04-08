@@ -479,7 +479,7 @@
         );
 
         const CandleIcon = ({ lit }) => (
-            <svg viewBox="0 0 24 24" className={`w-6 h-6 transition-all duration-500 ${lit ? 'text-yellow-400 drop-shadow-[0_0_8px_rgba(250,204,21,0.9)] scale-110' : 'text-slate-600 opacity-40 scale-90'}`} fill="currentColor">
+            <svg viewBox="0 0 24 24" className={`w-6 h-6 transition-all duration-500 ${lit ? 'text-yellow-300 drop-shadow-[0_0_16px_rgba(250,204,21,1)] scale-110' : 'text-slate-600 opacity-40 scale-90'}`} fill="currentColor">
                 <path d="M11 21h2v-7h-2v7zm1-14c-1.1 0-2 1.1-2 2.5a2.5 2.5 0 1 0 4 0c0-1.4-.9-2.5-2-2.5z" />
                 <rect x="9" y="14" width="6" height="1" rx="0.5" />
             </svg>
@@ -551,8 +551,7 @@
             };
             
             const dk = divineKeys[lang];
-            const mysteryKeys={'Mầu Nhiệm Vui':'Joyful Mysteries','Mầu Nhiệm Thương':'Sorrowful Mysteries','Mầu Nhiệm Mừng':'Glorious Mysteries','Mầu Nhiệm Sáng':'Luminous Mysteries'};
-            const currentMysKey=lang==='vi'?mys:mysteryKeys[mys]||'Joyful Mysteries';
+            const currentMysKey=mys || (lang==='vi'?'Mầu Nhiệm Vui':'Joyful Mysteries');
             
             const getDivineNormalStep=()=>{
                 if(s===0)return {i:t.ui.signCrossOnly,p:'',c:0,e:'✝️'};
@@ -673,9 +672,38 @@
                         
                         const mysteryName=mode==='rosary'?currentMysKey:(lang==='vi'?'Lòng Thương Xót':'Divine Mercy')+(divineVariant==='3pm'?' (3PM)':'');
                         const sess={mystery:mysteryName,date:new Date().toLocaleString(lang==='vi'?'vi-VN':'en-US'),completed:true,time:prayerTime};
-                        const newH=[sess,...hist.slice(0,9)],newT=total+1,newS=streak+1;
+                        const newH=[sess,...hist.slice(0,9)];
+                        const newT=total+1;
+                        
+                        let newS = streak;
+                        const todayStr = new Date().toDateString();
+                        const savedDataStr = localStorage.getItem('rosaryData');
+                        let savedLastDate = null;
+                        if (savedDataStr) {
+                            try { savedLastDate = JSON.parse(savedDataStr).lastPrayedDate; } catch(e){}
+                        }
+                        
+                        if (!savedLastDate && streak > 0) {
+                            newS = streak + 1; // Preserve and increment legacy inflated streak first time
+                        } else if (savedLastDate !== todayStr) {
+                            if (savedLastDate) {
+                                const lastDate = new Date(savedLastDate);
+                                lastDate.setHours(0,0,0,0);
+                                const todayMidnight = new Date();
+                                todayMidnight.setHours(0,0,0,0);
+                                const diffDays = Math.round((todayMidnight - lastDate) / (1000 * 60 * 60 * 24));
+                                if (diffDays === 1) {
+                                    newS += 1;
+                                } else if (diffDays > 1) {
+                                    newS = 1;
+                                }
+                            } else {
+                                newS = 1;
+                            }
+                        }
+
                         setHist(newH);setTotal(newT);setStreak(newS);setTimeStats(newStats);
-                        localStorage.setItem('rosaryData',JSON.stringify({history:newH,totalPrayers:newT,streak:newS,language:lang,fontSize:fontSize,darkMode:darkMode,timeStats:newStats,mode:mode,divineVariant:divineVariant}));
+                        localStorage.setItem('rosaryData',JSON.stringify({history:newH,totalPrayers:newT,streak:newS,lastPrayedDate:todayStr,language:lang,fontSize:fontSize,darkMode:darkMode,timeStats:newStats,mode:mode,divineVariant:divineVariant}));
                         setS(0);setBc(0);setDec(0);setStartTime(null);
                     }
                 }else{setBc(bc+1);}
@@ -771,11 +799,7 @@
                 else if (currentMysKey.includes('Sáng') || currentMysKey.includes('Luminous')) prefix = 'luminous';
                 
                 if (prefix) {
-                    if (prefix === 'luminous' && dIdx > 2) {
-                        currentImage = null; 
-                    } else {
-                        currentImage = `./assets/${prefix}_${dIdx}.png`;
-                    }
+                    currentImage = `./assets/${prefix}_${dIdx}.png`;
                 }
             }
 
