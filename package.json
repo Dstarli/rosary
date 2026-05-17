@@ -1,0 +1,25 @@
+{
+  "name": "rosary-prayer-app",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Vietnamese and English Rosary and Divine Mercy prayer app for web, iOS, and Android.",
+  "scripts": {
+    "build:web": "node scripts/build-web.mjs",
+    "serve": "python3 -m http.server 8000",
+    "cap:sync": "npm run build:web && cap sync",
+    "android": "npm run build:web && cap open android",
+    "ios": "npm run build:web && cap open ios",
+    "check": "npm run build:web"
+  },
+  "dependencies": {
+    "@babel/standalone": "^7.29.4",
+    "@capacitor/android": "^7.6.5",
+    "@capacitor/core": "^7.6.5",
+    "@capacitor/ios": "^7.6.5",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "^7.6.5"
+  }
+}

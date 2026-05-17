@@ -1,0 +1,14 @@
+{
+  "appId": "com.dstarli.rosary",
+  "appName": "Mân Côi",
+  "webDir": "dist",
+  "server": {
+    "androidScheme": "https"
+  },
+  "plugins": {
+    "SplashScreen": {
+      "launchAutoHide": true,
+      "backgroundColor": "#111827"
+    }
+  }
+}

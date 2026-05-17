@@ -8,23 +8,22 @@
     <meta name="theme-color" content="#1e3a8a">
     <link rel="apple-touch-icon" href="icon-192.png">
     <meta name="description" content="Ứng dụng hỗ trợ cầu nguyện Mân Côi và Chuỗi Lòng Thương Xót">
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Lora:ital,wght@0,400;0,500;0,600;1,400;1,500&display=swap" rel="stylesheet">
+    <script src="vendor/tailwindcss-browser.js"></script>
     <script>
         tailwind.config = {
             theme: {
                 extend: {
                     fontFamily: {
-                        sans: ['Inter', 'sans-serif'],
-                        serif: ['Lora', 'serif'],
+                        sans: ['ui-sans-serif', 'system-ui', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'sans-serif'],
+                        serif: ['Georgia', 'Times New Roman', 'serif'],
                     }
                 }
             }
         }
     </script>
-    <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
-    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
-    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="vendor/react.production.min.js"></script>
+    <script src="vendor/react-dom.production.min.js"></script>
+    <script src="vendor/babel.min.js"></script>
     
     <style>
         @keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}}
@@ -346,6 +345,15 @@
             background:rgba(255,255,255,0.15);
             box-shadow:0 2px 6px rgba(0,0,0,0.15);
         }
+
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                scroll-behavior: auto !important;
+                transition-duration: 0.01ms !important;
+            }
+        }
     </style>
 </head>
 <body>
@@ -422,6 +430,31 @@
             en: { mysteries: mysteriesData.en, prayers: prayersData.en, ui: uiTexts.en }
         };
 
+        const STORAGE_KEY = 'rosaryData';
+
+        const readSavedData = () => {
+            try {
+                return JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}') || {};
+            } catch (error) {
+                console.warn('Could not read saved rosary data:', error);
+                return {};
+            }
+        };
+
+        const saveRosaryData = (patch) => {
+            try {
+                const current = readSavedData();
+                localStorage.setItem(STORAGE_KEY, JSON.stringify({
+                    ...current,
+                    ...patch,
+                    schemaVersion: 1,
+                    updatedAt: new Date().toISOString()
+                }));
+            } catch (error) {
+                console.warn('Could not save rosary data:', error);
+            }
+        };
+
         const getFormattedDate = (language = 'vi') => {
             const date = new Date();
             const options = { 
@@ -488,6 +521,7 @@
         function App(){
             const [mode,setMode]=useState('rosary');
             const [divineVariant,setDivineVariant]=useState('normal'); 
+            const loadedRef=useRef(false);
             const [s,setS]=useState(0),[bc,setBc]=useState(0),[dec,setDec]=useState(0),
                   [showP,setShowP]=useState(false),[showM,setShowM]=useState(false),[showCredit,setShowCredit]=useState(false),
                   [hist,setHist]=useState([]),[darkMode,setDarkMode]=useState(true),[share,setShare]=useState(false),
@@ -496,8 +530,9 @@
                   [timeStats,setTimeStats]=useState({times:[],avgTime:0,totalTime:0});
             
             const [mys,setMys]=useState(()=>{
-                const saved=localStorage.getItem('rosaryData');
-                const savedLang = saved ? JSON.parse(saved).language || 'vi' : 'vi';
+                const saved = readSavedData();
+                const savedLang = saved.language || 'vi';
+                if (saved.selectedMystery) return saved.selectedMystery;
                 return getTodayMystery(savedLang);
             });
             
@@ -506,9 +541,8 @@
             const nextBtnRef=useRef(null), prevBtnRef=useRef(null);
            
             useEffect(()=>{
-                const saved=localStorage.getItem('rosaryData');
-                if(saved){
-                    const d=JSON.parse(saved);
+                const d = readSavedData();
+                if(Object.keys(d).length){
                     setHist(d.history||[]);
                     setTotal(d.totalPrayers||0);
                     setStreak(d.streak||0);
@@ -518,8 +552,39 @@
                     setTimeStats(d.timeStats||{times:[],avgTime:0,totalTime:0});
                     setMode(d.mode||'rosary');
                     setDivineVariant(d.divineVariant||'normal');
+                    setMys(d.selectedMystery || getTodayMystery(d.language || 'vi'));
+                    if (d.session && Number(d.session.step) > 0) {
+                        setS(Number(d.session.step) || 0);
+                        setBc(Number(d.session.beadCount) || 0);
+                        setDec(Number(d.session.decade) || 0);
+                        setStartTime(Number(d.session.startTime) || Date.now());
+                    }
                 }
+                loadedRef.current = true;
             },[]);
+
+            useEffect(()=>{
+                if(!loadedRef.current)return;
+                saveRosaryData({
+                    history:hist,
+                    totalPrayers:total,
+                    streak:streak,
+                    language:lang,
+                    fontSize:fontSize,
+                    darkMode:darkMode,
+                    timeStats:timeStats,
+                    mode:mode,
+                    divineVariant:divineVariant,
+                    selectedMystery:mys,
+                    session:s>0?{
+                        step:s,
+                        beadCount:bc,
+                        decade:dec,
+                        startTime:startTime,
+                        updatedAt:new Date().toISOString()
+                    }:null
+                });
+            },[hist,total,streak,lang,fontSize,darkMode,timeStats,mode,divineVariant,mys,s,bc,dec,startTime]);
             
             useEffect(()=>{
                 if(s===1&&startTime===null){
@@ -621,7 +686,8 @@
             const cur = mode === 'divine' ? getDivineStep() : getRosaryStep();
             const cm = mode === 'rosary' ? M[currentMysKey] : {color:'from-red-400 to-pink-500'};
             const maxSteps = mode==='rosary'?26:(divineVariant==='normal'?16:18);
-            const prog = (s/maxSteps)*100;
+            const progressStep = Math.min(maxSteps - 1, s + (cur.c > 1 ? bc / cur.c : 0));
+            const prog = Math.min(100, Math.round((progressStep / (maxSteps - 1)) * 100));
             
             const [,setTick]=useState(0);
             useEffect(()=>{
@@ -677,11 +743,7 @@
                         
                         let newS = streak;
                         const todayStr = new Date().toDateString();
-                        const savedDataStr = localStorage.getItem('rosaryData');
-                        let savedLastDate = null;
-                        if (savedDataStr) {
-                            try { savedLastDate = JSON.parse(savedDataStr).lastPrayedDate; } catch(e){}
-                        }
+                        const savedLastDate = readSavedData().lastPrayedDate || null;
                         
                         if (!savedLastDate && streak > 0) {
                             newS = streak + 1; // Preserve and increment legacy inflated streak first time
@@ -703,7 +765,7 @@
                         }
 
                         setHist(newH);setTotal(newT);setStreak(newS);setTimeStats(newStats);
-                        localStorage.setItem('rosaryData',JSON.stringify({history:newH,totalPrayers:newT,streak:newS,lastPrayedDate:todayStr,language:lang,fontSize:fontSize,darkMode:darkMode,timeStats:newStats,mode:mode,divineVariant:divineVariant}));
+                        saveRosaryData({history:newH,totalPrayers:newT,streak:newS,lastPrayedDate:todayStr,language:lang,fontSize:fontSize,darkMode:darkMode,timeStats:newStats,mode:mode,divineVariant:divineVariant,selectedMystery:mys,session:null});
                         setS(0);setBc(0);setDec(0);setStartTime(null);
                     }
                 }else{setBc(bc+1);}
@@ -742,8 +804,7 @@
             const toggleDarkMode=()=>{
                 const newDark=!darkMode;
                 setDarkMode(newDark);
-                const saved=localStorage.getItem('rosaryData');
-                if(saved){const d=JSON.parse(saved);d.darkMode=newDark;localStorage.setItem('rosaryData',JSON.stringify(d));}
+                saveRosaryData({darkMode:newDark});
             };
             
             const toggleLang=()=>{
@@ -751,8 +812,7 @@
                 setLang(newLang);
                 const mysteryMap={'Mầu Nhiệm Vui':'Joyful Mysteries','Mầu Nhiệm Thương':'Sorrowful Mysteries','Mầu Nhiệm Mừng':'Glorious Mysteries','Mầu Nhiệm Sáng':'Luminous Mysteries','Joyful Mysteries':'Mầu Nhiệm Vui','Sorrowful Mysteries':'Mầu Nhiệm Thương','Glorious Mysteries':'Mầu Nhiệm Mừng','Luminous Mysteries':'Mầu Nhiệm Sáng'};
                 setMys(mysteryMap[mys]||getTodayMystery(newLang));
-                const saved=localStorage.getItem('rosaryData');
-                if(saved){const d=JSON.parse(saved);d.language=newLang;localStorage.setItem('rosaryData',JSON.stringify(d));}
+                saveRosaryData({language:newLang,selectedMystery:mysteryMap[mys]||getTodayMystery(newLang)});
             };
             
             const toggleFontSize=()=>{
@@ -760,8 +820,7 @@
                 const idx=sizes.indexOf(fontSize);
                 const newSize=sizes[(idx+1)%3];
                 setFontSize(newSize);
-                const saved=localStorage.getItem('rosaryData');
-                if(saved){const d=JSON.parse(saved);d.fontSize=newSize;localStorage.setItem('rosaryData',JSON.stringify(d));}
+                saveRosaryData({fontSize:newSize});
             };
             
             const switchMode=(newMode)=>{
@@ -770,8 +829,7 @@
                 }
                 setMode(newMode);
                 setS(0);setBc(0);setDec(0);setStartTime(null);
-                const saved=localStorage.getItem('rosaryData');
-                if(saved){const d=JSON.parse(saved);d.mode=newMode;localStorage.setItem('rosaryData',JSON.stringify(d));}
+                saveRosaryData({mode:newMode,session:null});
             };
             
             const switchDivineVariant=(variant)=>{
@@ -780,8 +838,7 @@
                 }
                 setDivineVariant(variant);
                 setS(0);setBc(0);setDec(0);setStartTime(null);
-                const saved=localStorage.getItem('rosaryData');
-                if(saved){const d=JSON.parse(saved);d.divineVariant=variant;localStorage.setItem('rosaryData',JSON.stringify(d));}
+                saveRosaryData({divineVariant:variant,session:null});
             };
             
             const getFontSizeClass=()=>{
@@ -790,6 +847,7 @@
             };
 
             let currentImage = null;
+            let currentImageAlt = '';
             if (mode === 'rosary' && s >= 4 && s < 24) {
                 const dIdx = Math.floor((s-4)/4) + 1; // 1 to 5
                 let prefix = '';
@@ -799,7 +857,8 @@
                 else if (currentMysKey.includes('Sáng') || currentMysKey.includes('Luminous')) prefix = 'luminous';
                 
                 if (prefix) {
-                    currentImage = `./assets/${prefix}_${dIdx}.png`;
+                    currentImage = `./assets/${prefix}_${dIdx}.jpg`;
+                    currentImageAlt = `${currentMysKey} - ${lang === 'vi' ? 'mầu nhiệm thứ' : 'mystery'} ${dIdx}`;
                 }
             }
 
@@ -809,6 +868,8 @@
                 },
                     React.createElement('img', {
                         src: currentImage,
+                        alt: '',
+                        'aria-hidden': 'true',
                         className: `w-full h-full object-cover opacity-${darkMode?'20':'15'} blur-[60px] transform scale-110`
                     }),
                     darkMode && React.createElement('div', {className: 'absolute inset-0 bg-slate-950/60'})
@@ -878,7 +939,7 @@
                         ),
                         
                         currentImage && React.createElement('div', {className: 'relative w-full aspect-video rounded-3xl overflow-hidden shadow-2xl mb-8 fade-in group ring-1 ring-white/20'},
-                            React.createElement('img',{src:currentImage, className:`w-full h-full object-cover transition-transform duration-[3s] ease-out group-hover:scale-110`}),
+                            React.createElement('img',{src:currentImage, alt:currentImageAlt, className:`w-full h-full object-cover transition-transform duration-[3s] ease-out group-hover:scale-110`}),
                             React.createElement('div',{className:'absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent'})
                         ),
                         
@@ -889,11 +950,11 @@
                             mode==='rosary'&&React.createElement('p',{className:`${darkMode?'text-purple-400':'text-purple-600'} text-xs opacity-60`},cm.days),
                             mode==='divine'&&React.createElement('p',{className:`${darkMode?'text-red-300':'text-red-700'} text-sm font-medium`},divineVariant==='normal'?t.ui.normalTime:t.ui.threePM)
                         ),
-                        React.createElement('div',{className:`${darkMode?'bg-white/10':'bg-white/50'} rounded-full h-2 mb-6`},
+                        React.createElement('div',{className:`${darkMode?'bg-white/10':'bg-white/50'} rounded-full h-2 mb-6`,role:'progressbar','aria-valuemin':'0','aria-valuemax':'100','aria-valuenow':String(prog),'aria-label':lang==='vi'?'Tiến độ cầu nguyện':'Prayer progress'},
                             React.createElement('div',{className:`bg-gradient-to-r ${cm.color} h-2 rounded-full transition-all duration-700 ease-out`,style:{width:`${prog}%`, boxShadow: darkMode ? '0 0 10px ' + (cm.color.includes('blue')?'#60a5fa':cm.color.includes('amber')?'#fbbf24':cm.color.includes('red')?'#f87171':'#38bdf8') : 'none'}})
                         ),
                         React.createElement('div',{className:`${darkMode?'bg-slate-900/40 border-slate-700':'bg-white/80 border-slate-200'} shadow-inner rounded-3xl p-6 mb-6 border prayer-container`},
-                            React.createElement('div',{key:s,className:'prayer-content-scroll fade-slide'},
+                            React.createElement('div',{key:s,className:'prayer-content-scroll fade-slide','aria-live':'polite'},
                                 React.createElement('div',{className:'text-center mb-4'},
                                     cur.e&&React.createElement('div',{className:'text-6xl mb-2'},cur.e),
                                     React.createElement('div',{className:`${darkMode?'text-white':'text-gray-900'} text-xl font-medium mb-3`},cur.i),
@@ -1129,9 +1190,10 @@
     </script>
     
     <script>
-        if('serviceWorker' in navigator){
+        const isNativeApp = window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform();
+        if(!isNativeApp && 'serviceWorker' in navigator){
             window.addEventListener('load',()=>{
-                navigator.serviceWorker.register('/service-worker.js')
+                navigator.serviceWorker.register('./service-worker.js')
                     .then(reg=>console.log('✅ SW registered:',reg.scope))
                     .catch(err=>console.log('⚠ SW registration failed:',err));
             });

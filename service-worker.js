@@ -1,56 +1,51 @@
-// ========== SERVICE WORKER v5.0 (FIXED) ==========
+// ========== SERVICE WORKER v6.0 ==========
 
-const CACHE_NAME = 'rosary-app-v5.0';
-const DYNAMIC_CACHE = 'rosary-dynamic-v5.0';
+const CACHE_NAME = 'rosary-app-v6.0';
+const DYNAMIC_CACHE = 'rosary-dynamic-v6.0';
 
-// ✅ CRITICAL: Include ALL resources needed for offline functionality
 const STATIC_ASSETS = [
     './',
     './index.html',
     './prayers.js',
     './manifest.json',
-    './icon-192.png',
-    './icon-512.png'
-];
-
-// ✅ CDN resources that should be cached for offline use
-const CDN_ASSETS = [
-    'https://cdn.tailwindcss.com',
-    'https://unpkg.com/react@18/umd/react.production.min.js',
-    'https://unpkg.com/react-dom@18/umd/react-dom.production.min.js',
-    'https://unpkg.com/@babel/standalone/babel.min.js'
+    './icon-192.jpg',
+    './icon-512.jpg',
+    './vendor/tailwindcss-browser.js',
+    './vendor/react.production.min.js',
+    './vendor/react-dom.production.min.js',
+    './vendor/babel.min.js',
+    './assets/joyful_1.jpg',
+    './assets/joyful_2.jpg',
+    './assets/joyful_3.jpg',
+    './assets/joyful_4.jpg',
+    './assets/joyful_5.jpg',
+    './assets/sorrowful_1.jpg',
+    './assets/sorrowful_2.jpg',
+    './assets/sorrowful_3.jpg',
+    './assets/sorrowful_4.jpg',
+    './assets/sorrowful_5.jpg',
+    './assets/glorious_1.jpg',
+    './assets/glorious_2.jpg',
+    './assets/glorious_3.jpg',
+    './assets/glorious_4.jpg',
+    './assets/glorious_5.jpg',
+    './assets/luminous_1.jpg',
+    './assets/luminous_2.jpg',
+    './assets/luminous_3.jpg',
+    './assets/luminous_4.jpg',
+    './assets/luminous_5.jpg'
 ];
 
 // ========== INSTALL EVENT ==========
 // Cache all static and CDN assets when SW is installed
 self.addEventListener('install', event => {
-    console.log('[SW] Installing Service Worker v3.0...');
+    console.log('[SW] Installing Service Worker v6.0...');
     
     event.waitUntil(
-        Promise.all([
-            // Cache static assets
-            caches.open(CACHE_NAME).then(cache => {
-                console.log('[SW] Caching static assets');
-                return cache.addAll(STATIC_ASSETS);
-            }),
-            // Cache CDN resources
-            caches.open(DYNAMIC_CACHE).then(cache => {
-                console.log('[SW] Caching CDN resources');
-                return Promise.all(
-                    CDN_ASSETS.map(url => {
-                        return fetch(url, { mode: 'cors' })
-                            .then(response => {
-                                if (response.ok) {
-                                    return cache.put(url, response);
-                                }
-                            })
-                            .catch(err => {
-                                console.warn('[SW] Failed to cache CDN:', url, err);
-                            });
-                    })
-                );
-            })
-        ]).then(() => {
+        caches.open(CACHE_NAME).then(cache => {
+            console.log('[SW] Caching static assets');
+            return cache.addAll(STATIC_ASSETS);
+        }).then(() => {
             console.log('[SW] Installation complete!');
             return self.skipWaiting(); // Activate immediately
         })
@@ -60,7 +55,7 @@ self.addEventListener('install', event => {
 // ========== ACTIVATE EVENT ==========
 // Clean up old caches
 self.addEventListener('activate', event => {
-    console.log('[SW] Activating Service Worker v3.0...');
+    console.log('[SW] Activating Service Worker v6.0...');
     
     event.waitUntil(
         caches.keys().then(cacheNames => {
@@ -100,7 +95,9 @@ self.addEventListener('fetch', event => {
         (async () => {
             try {
                 // For HTML files: Network first, fallback to cache
-                if (request.headers.get('accept').includes('text/html')) {
+                const accept = request.headers.get('accept') || '';
+
+                if (accept.includes('text/html')) {
                     try {
                         const networkResponse = await fetch(request);
                         // Update cache with new version
@@ -141,7 +138,7 @@ self.addEventListener('fetch', event => {
                 console.error('[SW] Fetch failed:', request.url, error);
                 
                 // Return offline page or error response
-                if (request.headers.get('accept').includes('text/html')) {
+                if (accept.includes('text/html')) {
                     return new Response(
                         `<!DOCTYPE html>
                         <html>
