@@ -99,12 +99,39 @@ const pageStyles = `
   main{padding:clamp(56px,9vw,104px) 0 80px}.eyebrow{margin:0 0 12px;color:var(--accent);font-size:.78rem;font-weight:850;letter-spacing:.14em;text-transform:uppercase}h1{max-width:820px;margin:0;font-family:Georgia,"Times New Roman",serif;font-size:clamp(2.35rem,7vw,4.7rem);line-height:1.06;text-wrap:balance}.lead{max-width:760px;margin:24px 0 0;color:#d8e5e9;font-size:clamp(1.05rem,2.8vw,1.3rem);line-height:1.65;text-wrap:pretty}
   .actions{display:flex;flex-wrap:wrap;gap:12px;margin-top:30px}.button{display:inline-flex;align-items:center;justify-content:center;min-height:48px;padding:12px 19px;border-radius:999px;background:var(--accent);color:#08202a;text-decoration:none;font-weight:850}.button.secondary{border:1px solid var(--line);background:rgba(255,255,255,.04);color:white}
   .content{margin-top:58px;display:grid;gap:22px}.card{padding:clamp(22px,4vw,34px);border:1px solid var(--line);border-radius:24px;background:rgba(18,36,43,.8)}h2{margin:0 0 14px;font-family:Georgia,"Times New Roman",serif;font-size:clamp(1.55rem,4vw,2.2rem)}h3{margin:22px 0 7px;color:var(--gold);font-size:1.03rem}p{margin:0 0 16px}p:last-child{margin-bottom:0}ul,ol{margin:10px 0 0;padding-left:24px}li+li{margin-top:8px}.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px}.note{border-left:3px solid var(--gold);padding:15px 18px;background:rgba(246,207,114,.08);color:#e9e2d2}.site-footer{padding:28px 0 42px;border-top:1px solid var(--line);color:var(--muted);font-size:.88rem}.site-footer a{color:var(--muted)}
+  .privacy-return-bar{position:sticky;top:0;z-index:20;padding:calc(10px + env(safe-area-inset-top,0px)) 0 10px;background:rgba(12,17,20,.94);backdrop-filter:blur(16px);border-bottom:1px solid rgba(182,197,203,.12)}
+  .privacy-return-bar .shell{display:flex;justify-content:flex-end}
+  .privacy-return{display:inline-flex;align-items:center;gap:10px;min-height:44px;padding:6px 14px;border-radius:999px;color:#e5edf0;text-decoration:none;font-size:.95rem;font-weight:650}
+  .privacy-return span:first-child{font-size:1.65rem;font-weight:400;line-height:1}
+  .privacy-return:hover{background:rgba(255,255,255,.08)}
+  .privacy-return:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
+  .privacy-page .shell{width:min(720px,calc(100% - 40px))}
+  .privacy-page .site-header{padding:24px 0 0;border:0}
+  .privacy-page .site-nav{display:none}
+  .privacy-page main{padding:48px 0 64px}
+  .privacy-page h1{font-size:clamp(2.2rem,7vw,3.7rem);line-height:1.15}
+  .privacy-page .lead{font-size:1.1rem;color:var(--muted)}
+  .privacy-page .content{margin-top:42px;display:block}
+  .privacy-page .card{padding:0;margin:0 0 32px;border:0;border-radius:0;background:none}
+  .privacy-page h2{font-family:inherit;font-size:1.15rem;line-height:1.5;margin-bottom:10px;color:#f3e4bf}
+  .privacy-page .card p{color:#c1cdd2;line-height:1.85}
+  .privacy-page .site-footer{font-size:.85rem}
   @media(max-width:680px){.grid{grid-template-columns:1fr}.site-nav{gap:8px 14px}.site-nav a{font-size:.86rem}}
 `;
 
 function renderStaticPage({ path, lang = "vi", title, description, eyebrow, heading, lead, body }) {
   const canonical = `${origin}${path}`;
   const english = lang === "en";
+  const isPrivacy = path === "/privacy/";
+  const privacyReturn = `<div class="privacy-return-bar"><div class="shell"><a class="privacy-return" href="/" aria-label="Đóng chính sách riêng tư và về ứng dụng"><span aria-hidden="true">×</span><span id="privacy-return-label">Về ứng dụng</span></a></div></div>
+  <script>
+    try {
+      if (JSON.parse(localStorage.getItem('rosaryData') || '{}').language === 'en') {
+        document.getElementById('privacy-return-label').textContent = 'Back to app';
+        document.querySelector('.privacy-return').setAttribute('aria-label', 'Close privacy policy and return to app');
+      }
+    } catch (_) {}
+  </script>`;
   const navigation = renderNavigation(lang);
   const actions = english
     ? `<a class="button" href="/">Open the prayer app</a><a class="button secondary" href="/gioi-thieu/" lang="vi">Vietnamese introduction</a>`
@@ -152,13 +179,14 @@ function renderStaticPage({ path, lang = "vi", title, description, eyebrow, head
   <script type="application/ld+json">${structuredData}</script>
   <style>${pageStyles}</style>
 </head>
-<body>
+<body${isPrivacy ? ' class="privacy-page"' : ""}>
+  ${isPrivacy ? privacyReturn : ""}
   <header class="site-header"><div class="shell"><a class="brand" href="/">Love Rosary</a>${navigation}</div></header>
   <main class="shell">
     <p class="eyebrow">${eyebrow}</p>
     <h1>${heading}</h1>
     <p class="lead">${lead}</p>
-    <div class="actions">${actions}</div>
+    ${isPrivacy ? "" : `<div class="actions">${actions}</div>`}
     <div class="content">${body}</div>
   </main>
   <footer class="site-footer"><div class="shell">${footer}</div></footer>
@@ -264,4 +292,4 @@ console.log(`Built static app and ${staticPages.length} crawlable content pages 
 const sourceFiles = ["index.html", "prayers.js", "service-worker.js", "manifest.json", "scripts/build-web.mjs"];
 const fingerprint = createHash("sha256");
 for (const file of sourceFiles) fingerprint.update(file).update(readFileSync(join(root, file)));
-writeFileSync(join(dist, "release.json"), JSON.stringify({ version: "7.04", sourceSha256: fingerprint.digest("hex") }, null, 2) + "\n");
+writeFileSync(join(dist, "release.json"), JSON.stringify({ version: "7.05", sourceSha256: fingerprint.digest("hex") }, null, 2) + "\n");

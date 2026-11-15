@@ -1,7 +1,7 @@
-// ========== SERVICE WORKER v7.04 ==========
+// ========== SERVICE WORKER v7.05 ==========
 
-const CACHE_NAME = 'rosary-app-v7.04';
-const DYNAMIC_CACHE = 'rosary-dynamic-v7.04';
+const CACHE_NAME = 'rosary-app-v7.05';
+const DYNAMIC_CACHE = 'rosary-dynamic-v7.05';
 
 const STATIC_ASSETS = [
     './',
@@ -50,7 +50,7 @@ const STATIC_ASSETS = [
 // ========== INSTALL EVENT ==========
 // Cache all static and CDN assets when SW is installed
 self.addEventListener('install', event => {
-    console.log('[SW] Installing Service Worker v7.04...');
+    console.log('[SW] Installing Service Worker v7.05...');
 
     event.waitUntil(
         caches.open(CACHE_NAME).then(cache => {
@@ -66,7 +66,7 @@ self.addEventListener('install', event => {
 // ========== ACTIVATE EVENT ==========
 // Clean up old caches
 self.addEventListener('activate', event => {
-    console.log('[SW] Activating Service Worker v7.04...');
+    console.log('[SW] Activating Service Worker v7.05...');
 
     event.waitUntil(
         caches.keys().then(cacheNames => {
