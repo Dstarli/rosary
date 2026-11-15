@@ -1,0 +1,12 @@
+node_modules/
+dist/
+.DS_Store
+*.log
+.env
+.env.*
+releases/
+*.jks
+*.keystore
+*.p12
+keystore.properties
+.wrangler/

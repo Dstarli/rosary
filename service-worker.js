@@ -1,56 +1,62 @@
-// ========== SERVICE WORKER v5.0 (FIXED) ==========
+// ========== SERVICE WORKER v7.04 ==========
 
-const CACHE_NAME = 'rosary-app-v5.0';
-const DYNAMIC_CACHE = 'rosary-dynamic-v5.0';
+const CACHE_NAME = 'rosary-app-v7.04';
+const DYNAMIC_CACHE = 'rosary-dynamic-v7.04';
 
-// ✅ CRITICAL: Include ALL resources needed for offline functionality
 const STATIC_ASSETS = [
     './',
     './index.html',
     './prayers.js',
     './manifest.json',
-    './icon-192.png',
-    './icon-512.png'
-];
-
-// ✅ CDN resources that should be cached for offline use
-const CDN_ASSETS = [
-    'https://cdn.tailwindcss.com',
-    'https://unpkg.com/react@18/umd/react.production.min.js',
-    'https://unpkg.com/react-dom@18/umd/react-dom.production.min.js',
-    'https://unpkg.com/@babel/standalone/babel.min.js'
+    './robots.txt',
+    './sitemap.xml',
+    './llms.txt',
+    './kinh-man-coi/',
+    './long-thuong-xot/',
+    './kinh-nguyen/',
+    './lich-le-cong-giao/',
+    './gioi-thieu/',
+    './en/',
+    './privacy/',
+    './love-rosary-icon-192.png',
+    './love-rosary-icon-512.png',
+    './vendor/tailwindcss-browser.js',
+    './vendor/react.production.min.js',
+    './vendor/react-dom.production.min.js',
+    './assets/joyful_1-wide.webp',
+    './assets/joyful_2-wide.webp',
+    './assets/joyful_3-wide.webp',
+    './assets/joyful_4-wide.webp',
+    './assets/joyful_5-wide.webp',
+    './assets/sorrowful_1-v2-wide.webp',
+    './assets/sorrowful_2-v2-wide.webp',
+    './assets/sorrowful_3-v2-wide.webp',
+    './assets/sorrowful_4-v2-wide.webp',
+    './assets/sorrowful_5-v2-wide.webp',
+    './assets/glorious_1-wide.webp',
+    './assets/glorious_2-wide.webp',
+    './assets/glorious_3-wide.webp',
+    './assets/glorious_4-wide.webp',
+    './assets/glorious_5-wide.webp',
+    './assets/luminous_1-wide.webp',
+    './assets/luminous_2-wide.webp',
+    './assets/luminous_3-wide.webp',
+    './assets/luminous_4-wide.webp',
+    './assets/luminous_5-wide.webp',
+    './assets/divine_mercy-wide.webp',
+    './assets/completion-angels.webp'
 ];
 
 // ========== INSTALL EVENT ==========
 // Cache all static and CDN assets when SW is installed
 self.addEventListener('install', event => {
-    console.log('[SW] Installing Service Worker v3.0...');
-    
+    console.log('[SW] Installing Service Worker v7.04...');
+
     event.waitUntil(
-        Promise.all([
-            // Cache static assets
-            caches.open(CACHE_NAME).then(cache => {
-                console.log('[SW] Caching static assets');
-                return cache.addAll(STATIC_ASSETS);
-            }),
-            // Cache CDN resources
-            caches.open(DYNAMIC_CACHE).then(cache => {
-                console.log('[SW] Caching CDN resources');
-                return Promise.all(
-                    CDN_ASSETS.map(url => {
-                        return fetch(url, { mode: 'cors' })
-                            .then(response => {
-                                if (response.ok) {
-                                    return cache.put(url, response);
-                                }
-                            })
-                            .catch(err => {
-                                console.warn('[SW] Failed to cache CDN:', url, err);
-                            });
-                    })
-                );
-            })
-        ]).then(() => {
+        caches.open(CACHE_NAME).then(cache => {
+            console.log('[SW] Caching static assets');
+            return cache.addAll(STATIC_ASSETS);
+        }).then(() => {
             console.log('[SW] Installation complete!');
             return self.skipWaiting(); // Activate immediately
         })
@@ -60,8 +66,8 @@ self.addEventListener('install', event => {
 // ========== ACTIVATE EVENT ==========
 // Clean up old caches
 self.addEventListener('activate', event => {
-    console.log('[SW] Activating Service Worker v3.0...');
-    
+    console.log('[SW] Activating Service Worker v7.04...');
+
     event.waitUntil(
         caches.keys().then(cacheNames => {
             return Promise.all(
@@ -85,22 +91,23 @@ self.addEventListener('activate', event => {
 self.addEventListener('fetch', event => {
     const { request } = event;
     const url = new URL(request.url);
-    
+
     // Skip non-GET requests
     if (request.method !== 'GET') {
         return;
     }
-    
+
     // Skip chrome extensions and other protocols
     if (!url.protocol.startsWith('http')) {
         return;
     }
-    
+
     event.respondWith(
         (async () => {
+            const accept = request.headers.get('accept') || '';
             try {
                 // For HTML files: Network first, fallback to cache
-                if (request.headers.get('accept').includes('text/html')) {
+                if (accept.includes('text/html')) {
                     try {
                         const networkResponse = await fetch(request);
                         // Update cache with new version
@@ -109,7 +116,9 @@ self.addEventListener('fetch', event => {
                         return networkResponse;
                     } catch (error) {
                         // Network failed, try cache
-                        const cachedResponse = await caches.match(request);
+                        const cachedResponse = await caches.match(request)
+                            || await caches.match('./index.html')
+                            || await caches.match('./');
                         if (cachedResponse) {
                             console.log('[SW] Serving from cache (offline):', request.url);
                             return cachedResponse;
@@ -117,31 +126,31 @@ self.addEventListener('fetch', event => {
                         throw error;
                     }
                 }
-                
+
                 // For everything else: Cache first, fallback to network
                 const cachedResponse = await caches.match(request);
                 if (cachedResponse) {
                     console.log('[SW] Cache hit:', request.url);
                     return cachedResponse;
                 }
-                
+
                 // Not in cache, fetch from network
                 console.log('[SW] Fetching from network:', request.url);
                 const networkResponse = await fetch(request);
-                
+
                 // Cache the response for future use
                 if (networkResponse.ok) {
                     const cache = await caches.open(DYNAMIC_CACHE);
                     cache.put(request, networkResponse.clone());
                 }
-                
+
                 return networkResponse;
-                
+
             } catch (error) {
                 console.error('[SW] Fetch failed:', request.url, error);
-                
+
                 // Return offline page or error response
-                if (request.headers.get('accept').includes('text/html')) {
+                if (accept.includes('text/html')) {
                     return new Response(
                         `<!DOCTYPE html>
                         <html>
@@ -157,7 +166,7 @@ self.addEventListener('fetch', event => {
                                     justify-content: center;
                                     min-height: 100vh;
                                     margin: 0;
-                                    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                                    background: linear-gradient(145deg, #0c0e10 0%, #191c1f 100%);
                                     color: white;
                                     text-align: center;
                                     padding: 20px;
@@ -171,7 +180,7 @@ self.addEventListener('fetch', event => {
                                     margin-top: 2rem;
                                     padding: 12px 24px;
                                     background: white;
-                                    color: #667eea;
+                                    color: #111418;
                                     border: none;
                                     border-radius: 8px;
                                     font-size: 1rem;
@@ -195,7 +204,7 @@ self.addEventListener('fetch', event => {
                         }
                     );
                 }
-                
+
                 return new Response('Network error', { status: 408 });
             }
         })()
@@ -208,7 +217,7 @@ self.addEventListener('message', event => {
     if (event.data && event.data.type === 'SKIP_WAITING') {
         self.skipWaiting();
     }
-    
+
     if (event.data && event.data.type === 'CLEAR_CACHE') {
         event.waitUntil(
             caches.keys().then(cacheNames => {
@@ -220,4 +229,21 @@ self.addEventListener('message', event => {
             })
         );
     }
+});
+
+// Open or focus Love Rosary when a web notification is tapped.
+self.addEventListener('notificationclick', event => {
+    event.notification.close();
+    const targetUrl = event.notification.data?.url || './';
+    event.waitUntil(
+        clients.matchAll({ type: 'window', includeUncontrolled: true }).then(windowClients => {
+            const existing = windowClients.find(client => 'focus' in client);
+            if (existing) {
+                if ('navigate' in existing) existing.navigate(targetUrl);
+                return existing.focus();
+            }
+            if (clients.openWindow) return clients.openWindow(targetUrl);
+            return undefined;
+        })
+    );
 });

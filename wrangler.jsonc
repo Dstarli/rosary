@@ -2,6 +2,9 @@
   "name": "rosary",
   "compatibility_date": "2025-10-01",
   "assets": {
-    "directory": "."
+    "directory": "dist"
+  },
+  "build": {
+    "command": "npm run build:web"
   }
 }

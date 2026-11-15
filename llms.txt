@@ -1,0 +1,27 @@
+# Love Rosary
+
+Love Rosary is a free Vietnamese and English Catholic prayer application available at https://loverosary.com/.
+
+## Main features
+
+- Guided Holy Rosary with the Joyful, Sorrowful, Glorious, and Luminous Mysteries.
+- Divine Mercy Chaplet, including the traditional chaplet and a 3 PM prayer flow.
+- Vietnamese and English prayer text.
+- Catholic prayer library with prayers to the Blessed Virgin Mary, Saint Joseph, saints, blesseds, and archangels.
+- General Catholic feast calendar for Vietnam with date selection and reminder options.
+- On-device prayer history, duration, and streak tracking.
+- Light and dark display modes and adjustable text size.
+
+## Public pages
+
+- Home and interactive app: https://loverosary.com/
+- Holy Rosary guide: https://loverosary.com/kinh-man-coi/
+- Divine Mercy Chaplet guide: https://loverosary.com/long-thuong-xot/
+- Catholic prayer library: https://loverosary.com/kinh-nguyen/
+- Catholic feast calendar: https://loverosary.com/lich-le-cong-giao/
+- About Love Rosary: https://loverosary.com/gioi-thieu/
+- English overview: https://loverosary.com/en/
+- Privacy: https://loverosary.com/privacy/
+
+The application is developed by David Hua. Prayer content is intended as a clear, respectful companion for personal Catholic prayer.
+
